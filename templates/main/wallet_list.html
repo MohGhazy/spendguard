@@ -1,0 +1,14 @@
+<h2>Wallets</h2>
+<a href="{% url 'wallet_add' %}">+ Add Wallet</a>
+
+<ul>
+{% for w in wallets %}
+ <li>
+  {{ w.name }} ({{ w.initial_balance }})
+  <a href="{% url 'wallet_edit' w.id %}">Edit</a>
+  <a href="{% url 'wallet_delete' w.id %}">Delete</a>
+ </li>
+{% empty %}
+ <li>No wallets yet</li>
+{% endfor %}
+</ul>

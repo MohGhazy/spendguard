@@ -1,0 +1,10 @@
+<h2>Add Category</h2>
+<form method="POST">
+ {% csrf_token %}
+ <input name="name" placeholder="Category Name">
+ <select name="type">
+  <option value="income">Income</option>
+  <option value="expense">Expense</option>
+ </select>
+ <button type="submit">Save</button>
+</form>

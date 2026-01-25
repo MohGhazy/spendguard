@@ -1,0 +1,31 @@
+<h1>Edit Transaction</h1>
+<form method="POST">
+ {% csrf_token %}
+
+ <select name="type">
+  <option value="income" {% if tx.type == 'income' %}selected{% endif %}>Income</option>
+  <option value="expense" {% if tx.type == 'expense' %}selected{% endif %}>Expense</option>
+ </select>
+
+ <select name="wallet">
+  {% for w in wallets %}
+  <option value="{{ w.id }}" {% if tx.wallet.id == w.id %}selected{% endif %}>
+   {{ w.name }}
+  </option>
+  {% endfor %}
+ </select>
+
+ <select name="category">
+  {% for c in categories %}
+  <option value="{{ c.id }}" {% if tx.category.id == c.id %}selected{% endif %}>
+   {{ c.name }} ({{ c.type }})
+  </option>
+  {% endfor %}
+ </select>
+
+ <input type="number" name="amount" value="{{ tx.amount }}">
+ <input type="date" name="date" value="{{ tx.date|date:'Y-m-d' }}">
+ <input type="text" name="note" value="{{ tx.note }}">
+
+ <button type="submit">Save</button>
+</form>

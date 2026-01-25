@@ -1,0 +1,28 @@
+<h1>Add Transaction</h1>
+
+<form method="POST">
+ {% csrf_token %}
+
+ <select name="type">
+  <option value="income">Income</option>
+  <option value="expense">Expense</option>
+ </select>
+
+ <select name="wallet">
+ {% for w in wallets %}
+  <option value="{{ w.id }}">{{ w.name }}</option>
+ {% endfor %}
+ </select>
+
+ <select name="category">
+ {% for c in categories %}
+  <option value="{{ c.id }}">{{ c.name }} ({{ c.type }})</option>
+ {% endfor %}
+ </select>
+
+ <input type="number" name="amount" placeholder="Amount"/>
+ <input type="date" name="date"/>
+ <input type="text" name="note" placeholder="Optional note"/>
+
+ <button type="submit">Save</button>
+</form>

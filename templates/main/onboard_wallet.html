@@ -1,0 +1,8 @@
+<h1>Onboarding Wallet</h1>
+
+<form method="POST">
+ {% csrf_token %}
+ <input type="text" name="name" placeholder="Wallet Name">
+ <input type="number" name="balance" placeholder="Initial Balance">
+ <button type="submit">Next</button>
+</form>

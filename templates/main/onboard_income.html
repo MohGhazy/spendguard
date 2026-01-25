@@ -1,0 +1,13 @@
+<h1>Onboarding Income Categories</h1>
+
+<form method="POST">
+ {% csrf_token %}
+ {% for item in defaults %}
+  <label>
+   <input type="checkbox" name="categories" value="{{ item }}">
+   {{ item }}
+  </label><br>
+ {% endfor %}
+ <input type="text" name="custom" placeholder="Custom category">
+ <button type="submit">Next</button>
+</form>

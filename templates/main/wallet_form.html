@@ -1,0 +1,7 @@
+<h2>Add Wallet</h2>
+<form method="POST">
+ {% csrf_token %}
+ <input name="name" placeholder="Wallet Name">
+ <input name="initial_balance" type="number" placeholder="Initial Balance">
+ <button type="submit">Save</button>
+</form>
