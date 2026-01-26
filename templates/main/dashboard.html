@@ -1,60 +1,94 @@
 {% extends 'base.html' %}
 {% load currency %}
+{% load humanize %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<!-- FILTER -->
 <form method="GET" class="flex gap-3 mb-5">
     <select name="month" class="p-2 bg-gray-800 rounded">
         {% for m, label in months %}
-        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
-            {{ label }}
-        </option>
+        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
 
     <select name="year" class="p-2 bg-gray-800 rounded">
         {% for y in years %}
-        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
-            {{ y }}
-        </option>
+        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
         {% endfor %}
     </select>
 
     <button class="px-4 bg-indigo-600 rounded text-white">Apply</button>
 </form>
 
-
-<!-- SUMMARY -->
 <div class="grid grid-cols-3 gap-3 mb-6">
     <div class="p-4 bg-gray-800 rounded">
-        <div class="text-sm text-gray-400">Income</div>
+        <div class="text-sm text-gray-400">Pemasukan</div>
         <div class="text-green-400 text-xl font-bold">{{ income_total|rupiah }}</div>
     </div>
     <div class="p-4 bg-gray-800 rounded">
-        <div class="text-sm text-gray-400">Expense</div>
+        <div class="text-sm text-gray-400">Pengeluaran</div>
         <div class="text-red-400 text-xl font-bold">{{ expense_total|rupiah }}</div>
     </div>
     <div class="p-4 bg-gray-800 rounded">
-        <div class="text-sm text-gray-400">Balance</div>
+        <div class="text-sm text-gray-400">Saldo</div>
         <div class="text-blue-400 text-xl font-bold">{{ balance|rupiah }}</div>
     </div>
 </div>
 
+<!-- CHARTS GROUP (GRID) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 
-<!-- CHART -->
-{% if donut_values %}
-<div class="h-64">
-    <canvas id="expenseDonut"></canvas>
+    <!-- EXPENSE BLOCK -->
+    <div class="bg-gray-800 p-4 rounded">
+        <h2 class="font-semibold mb-3">Rincian Pengeluaran</h2>
+
+        {% if donut_values %}
+        <div class="relative w-full h-56 mb-3">
+            <canvas id="expenseDonut"></canvas>
+        </div>
+
+        <div class="space-y-1">
+            {% for item in breakdown %}
+            <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
+                <span>{{ item.name }}</span>
+                <span>Rp{{ item.value|intcomma }} ({{ item.pct }}%)</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="text-gray-500">Tidak ada data pengeluaran.</div>
+        {% endif %}
+    </div>
+
+    <!-- WALLET BLOCK -->
+    <div class="bg-gray-800 p-4 rounded">
+        <h2 class="font-semibold mb-3">Rincian Dompet</h2>
+
+        {% if wallet_values %}
+        <div class="relative w-full h-56 mb-3">
+            <canvas id="walletDonut"></canvas>
+        </div>
+
+        <div class="space-y-1">
+            {% for w in wallet_breakdown %}
+            <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
+                <span>{{ w.name }}</span>
+                <span>Rp{{ w.balance|floatformat:0|intcomma }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-gray-500">Tidak ada data dompet.</div>
+        {% endif %}
+    </div>
+
 </div>
-{% else %}
-<div class="text-gray-500">No expense data this month.</div>
-{% endif %}
 
-<!-- RECENT -->
-<h2 class="font-semibold mb-2 mt-6">Recent</h2>
+<!-- RECENT TRANSACTIONS -->
+<h2 class="font-semibold mb-2 mt-6">Transaksi Terbaru</h2>
 <div class="space-y-2">
     {% for t in tx %}
     <div class="p-3 border border-gray-700 rounded flex justify-between">
@@ -67,36 +101,185 @@
         </div>
     </div>
     {% empty %}
-    <div class="text-gray-500">No transactions this month.</div>
+    <div class="text-gray-500">Tidak ada transaksi bulan ini.</div>
     {% endfor %}
 </div>
 
-{% endblock %}
+<button id="addBtn"
+    class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white text-3xl shadow-lg flex items-center justify-center">
+    +
+</button>
 
+<!-- Overlay -->
+<div id="overlay"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden opacity-0 transition-opacity duration-200"></div>
+
+<!-- Bottom Sheet -->
+<div id="sheet"
+    class="fixed left-0 right-0 bottom-0 bg-gray-900 rounded-t-2xl shadow-xl p-5 hidden translate-y-full opacity-0 transition-all duration-200">
+    
+    <h2 class="text-lg font-semibold mb-3">Add Transaction</h2>
+
+    <form method="POST" action="/transactions/add/">
+        {% csrf_token %}
+
+        <input type="number" name="amount" placeholder="Amount"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700 focus:outline-none" autofocus>
+
+        <select name="type" class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            <option value="expense" selected>Expense</option>
+            <option value="income">Income</option>
+        </select>
+
+        <select name="wallet" class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            {% for w in wallets %}
+            <option value="{{ w.id }}">{{ w.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="category" id="categorySelect" class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            <optgroup>
+                {% for c in categories_income %}
+                <option value="{{ c.id }}" data-type="income">{{ c.name }}</option>
+                {% endfor %}
+            </optgroup>
+
+            <optgroup>
+                {% for c in categories_expense %}
+                <option value="{{ c.id }}" data-type="expense">{{ c.name }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+
+        <input type="date" name="date"
+            value="{{ selected_year }}-{{ selected_month }}-{{ today }}"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+
+        <input type="text" name="note" placeholder="Note (optional)"
+            class="w-full mb-5 p-2 bg-gray-800 rounded border border-gray-700">
+
+        <div class="flex justify-between">
+            <button type="button" id="cancelBtn"
+                class="px-4 py-2 rounded border border-gray-600 text-gray-300">Cancel</button>
+            <button type="submit"
+                class="px-4 py-2 rounded bg-indigo-600 text-white font-semibold">Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-new Chart(document.getElementById('expenseDonut'), {
+var ctx = document.getElementById('expenseDonut').getContext('2d');
+var ctx2 = document.getElementById('walletDonut').getContext('2d');
+
+new Chart(ctx, {
     type: 'doughnut',
     data: {
         labels: {{ donut_labels|safe }},
         datasets: [{
             data: {{ donut_values|safe }},
-            backgroundColor: [
-                '#10b981', '#e11d48', '#3b82f6', '#f59e0b', '#6366f1', '#84cc16', '#ef4444'
-            ],
+            backgroundColor: ['#ec4899','#3b82f6','#10b981','#f59e0b','#e11d48','#6366f1','#84cc16','#14b8a6'],
         }]
     },
     options: {
+        legend: { position: 'bottom', labels: { fontColor: 'white' } },
         responsive: true,
         maintainAspectRatio: false,
-        legend: {
-            position: 'bottom'
+        tooltips: {
+            callbacks: {
+                label: (item, data) => {
+                    let label = data.labels[item.index];
+                    let val = data.datasets[0].data[item.index];
+                    return label + ": Rp" + val.toLocaleString('id-ID');
+                }
+            }
         }
     }
 });
+
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: {{ wallet_labels|safe }},
+        datasets: [{
+            data: {{ wallet_values|safe }},
+            backgroundColor: ['#10b981','#6366f1','#f59e0b','#ef4444','#3b82f6','#14b8a6','#e11d48','#84cc16'],
+        }]
+    },
+    options: {
+        legend: { position: 'bottom', labels: { fontColor: 'white' } },
+        responsive: true,
+        maintainAspectRatio: false,
+        tooltips: {
+            callbacks: {
+                label: (item, data) => {
+                    let label = data.labels[item.index];
+                    let val = data.datasets[0].data[item.index];
+                    return label + ": Rp" + val.toLocaleString('id-ID');
+                }
+            }
+        }
+    }
+});
+</script>
+
+<script>
+const btn = document.getElementById('addBtn');
+const overlay = document.getElementById('overlay');
+const sheet = document.getElementById('sheet');
+const cancel = document.getElementById('cancelBtn');
+
+const typeSelect = document.querySelector('select[name="type"]')
+const categorySelect = document.getElementById('categorySelect');
+
+function openSheet() {
+    overlay.classList.remove('hidden');
+    sheet.classList.remove('hidden');
+
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        sheet.classList.remove('opacity-0', 'translate-y-full');
+    });
+}
+
+function closeSheet() {
+    overlay.classList.add('opacity-0');
+    sheet.classList.add('opacity-0', 'translate-y-full');
+
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        sheet.classList.add('hidden');
+    }, 200);
+}
+
+function filterCategory() {
+    const type = typeSelect.value;
+    const options = categorySelect.querySelectorAll('option');
+
+    options.forEach(opt => {
+        if (opt.dataset.type === type) {
+            opt.style.display = 'block';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+
+    // auto set ke opsi pertama yang match
+    const first = [...options].find(o => o.dataset.type === type);
+    if (first) categorySelect.value = first.value;
+}
+
+typeSelect.addEventListener('change', filterCategory);
+
+// trigger saat load
+filterCategory();
+
+btn.onclick = openSheet;
+overlay.onclick = closeSheet;
+cancel.onclick = closeSheet;
 </script>
 
 {% endblock %}

@@ -1,43 +1,32 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Transaction, Wallet, Category, Profile
 from django.db.models import Sum
-from datetime import datetime
-import calendar
-import json
+from datetime import datetime, date
+from .models import Transaction, Wallet, Category, Profile
 
 @login_required
 def dashboard_view(request):
     user = request.user
     now = datetime.now()
 
-    # ambil filter bulan & tahun
     month = request.GET.get('month')
     year = request.GET.get('year')
 
-    if month:
-        month = int(month)
-    else:
-        month = now.month
+    month = int(month) if month else now.month
+    year = int(year) if year else now.year
 
-    if year:
-        year = int(year)
-    else:
-        year = now.year
-
-    # QUERY UTAMA: transaksi pada bulan & tahun itu
     tx_all = Transaction.objects.filter(
         user=user,
         date__month=month,
         date__year=year
     )
 
-    # ===== SUMMARY =====
+    # SUMMARY
     income_total = tx_all.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
     expense_total = tx_all.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0
     balance = income_total - expense_total
 
-    # ===== DONUT DATA =====
+    # EXPENSE DONUT
     expense_group = (
         tx_all.filter(type='expense')
         .values('category__name')
@@ -48,17 +37,45 @@ def dashboard_view(request):
     donut_labels = [row['category__name'] for row in expense_group]
     donut_values = [float(row['total']) for row in expense_group]
 
-    # ===== RECENT =====
+    total_expense = sum(donut_values) if donut_values else 0
+
+    breakdown = []
+    for name, val in zip(donut_labels, donut_values):
+        pct = (val / total_expense * 100) if total_expense > 0 else 0
+        breakdown.append({
+            'name': name,
+            'value': val,
+            'pct': round(pct, 1)
+        })
+
+    breakdown.sort(key=lambda x: x['value'], reverse=True)
+
+    # WALLET BREAKDOWN (REAL BALANCE)
+    wallets = Wallet.objects.filter(user=request.user)
+    wallet_breakdown = []
+
+    for w in wallets:
+        income = Transaction.objects.filter(wallet=w, type='income').aggregate(total=Sum('amount'))['total'] or 0
+        expense = Transaction.objects.filter(wallet=w, type='expense').aggregate(total=Sum('amount'))['total'] or 0
+        real_balance = float(w.initial_balance) + float(income) - float(expense)
+
+        wallet_breakdown.append({
+            'name': w.name,
+            'balance': real_balance,
+        })
+
+    wallet_breakdown.sort(key=lambda x: x['balance'], reverse=True)
+
+    # RECENT
     tx_recent = tx_all.order_by('-date', '-id')[:10]
 
-    # ===== FILTER UI =====
+    # FILTER UI
     months = [
         (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
         (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
         (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
     ]
-
-    years = list(range(now.year - 3, now.year + 1))
+    years = list(range(now.year - 3, now.year + 1)) 
 
     context = {
         'tx': tx_recent,
@@ -71,6 +88,15 @@ def dashboard_view(request):
         'selected_year': year,
         'donut_labels': donut_labels,
         'donut_values': donut_values,
+        'breakdown': breakdown,
+        'wallet_breakdown': wallet_breakdown,
+        'wallet_labels': [w['name'] for w in wallet_breakdown],
+        'wallet_values': [w['balance'] for w in wallet_breakdown],
+        'today': date.today().strftime('%Y-%m-%d'),
+        'wallets': wallets,
+        'categories': Category.objects.filter(user=user),
+        'categories_income': Category.objects.filter(user=request.user, type='income'),
+        'categories_expense': Category.objects.filter(user=request.user, type='expense'),
     }
 
     return render(request, 'main/dashboard.html', context)
