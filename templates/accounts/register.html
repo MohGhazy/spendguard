@@ -1,7 +1,71 @@
-<form method="POST">
- {% csrf_token %}
- <input type="text" name="username" placeholder="username">
- <input type="password" name="password" placeholder="password">
- <button type="submit">Register</button>
-</form>
-<a href="/login">Login</a>
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes warpIn {
+      0%   { opacity:0; transform:scale(1.6); filter:blur(20px) brightness(2.2); }
+      60%  { opacity:1; transform:scale(0.8); filter:blur(4px) brightness(1.2); }
+      100% { opacity:1; transform:scale(1); filter:blur(0px) brightness(1); }
+    }
+
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-950 flex justify-center items-center min-h-screen relative overflow-hidden" onload="warpInAnim()">
+
+  <!-- Orbit Background -->
+  <div class="absolute w-72 h-72 rounded-full border border-indigo-500/30 animate-[orbit_14s_linear_infinite]"></div>
+  <div class="absolute w-72 h-72 rounded-full border border-indigo-500/10 animate-[orbit_20s_linear_reverse_infinite]"></div>
+
+  <div id="registerCard" class="w-full max-w-sm p-8 rounded-2xl bg-gray-900/70 backdrop-blur-xl border border-gray-800 shadow-2xl opacity-0">
+    
+    <h2 class="text-2xl text-white font-semibold text-center mb-2">
+      Spend<span class="text-indigo-400">Guard</span>
+    </h2>
+
+    <p class="text-center text-gray-400 mb-6">Buat akun baru</p>
+
+    {% if error %}
+    <div class="mb-4 text-center py-2 rounded-lg bg-red-600/30 text-red-300 border border-red-500/40">
+      Jangan lupa isi semua field!
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <input name="username" placeholder="Username" class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+      <input type="password" name="password" placeholder="Password" class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"/>
+      <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg active:scale-95 transition">
+        Daftar
+      </button>
+    </form>
+
+    <p class="text-center text-gray-400 text-sm mt-6">
+      Sudah punya akun?
+      <button type="button" onclick="goLogin()" class="text-indigo-400 hover:underline">
+        Masuk
+      </button>
+    </p>
+  </div>
+
+<script>
+  function warpInAnim(){
+    const card = document.getElementById('registerCard');
+    card.style.animation = "warpIn 0.5s cubic-bezier(.25,.8,.25,1) forwards";
+  }
+
+  function goLogin(){
+    const card = document.getElementById('registerCard');
+    card.style.animation = "warpOut 0.45s cubic-bezier(.25,.8,.25,1) forwards";
+    setTimeout(()=>{
+      window.location.href = "/accounts/login";
+    }, 460);
+  }
+</script>
+
+</body>
+</html>

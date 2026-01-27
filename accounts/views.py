@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 def register_view(request):
     if request.method == 'POST':
@@ -22,9 +23,10 @@ def login_view(request):
   user = authenticate(username=username, password=password)
   if user:
    login(request, user)
+   messages.success(request, 'Selamat datang dan Semoga Istiqomah Dalam Budgeting!')
    return redirect('dashboard')
   else:
-   return render(request, 'accounts/login.html', {'error': 'Invalid credentials'})
+   return render(request, 'accounts/login.html', {'error': 'Username atau password salah.'})
  return render(request, 'accounts/login.html')
 
 
