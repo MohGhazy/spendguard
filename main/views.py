@@ -22,9 +22,11 @@ def dashboard_view(request):
     )
 
     # SUMMARY
-    income_total = tx_all.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
     expense_total = tx_all.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0
-    balance = income_total - expense_total
+    initial_income = Wallet.objects.filter(user=user).aggregate(total=Sum('initial_balance'))['total'] or 0
+    real_income = tx_all.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
+    income_total = float(initial_income) + float(real_income)
+    balance = income_total - float(expense_total)
 
     # EXPENSE DONUT
     expense_group = (
