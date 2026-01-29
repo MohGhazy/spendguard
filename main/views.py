@@ -231,12 +231,22 @@ def transaction_delete(request, tx_id):
 
 @login_required
 def settings_home(request):
- return render(request, 'main/settings_home.html')
+    wallets = Wallet.objects.filter(user=request.user).order_by('name')
+    categories = Category.objects.filter(user=request.user).order_by('type', 'name')
+
+    context = {
+        'wallets': wallets,
+        'categories': categories,
+    }
+    return render(request, 'main/settings_home.html', context)
 
 @login_required
 def wallet_list(request):
- wallets = Wallet.objects.filter(user=request.user)
- return render(request, 'main/wallet_list.html', {'wallets': wallets})
+    wallets = Wallet.objects.filter(user=request.user).order_by('name')
+
+    return render(request, 'main/wallet_list.html', {
+        'wallets': wallets
+    })
 
 @login_required
 def wallet_add(request):

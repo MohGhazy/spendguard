@@ -1,6 +1,115 @@
-<h1>Settings</h1>
+{% extends 'base.html' %}
+{% load humanize %}
 
-<ul>
- <li><a href="{% url 'wallet_list' %}">Wallets</a></li>
- <li><a href="{% url 'category_list' %}">Categories</a></li>
-</ul>
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Settings</h1>
+
+<div class="grid md:grid-cols-2 gap-6">
+
+    <!-- WALLET -->
+    <div class="bg-gray-800 p-5 rounded-xl shadow">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-semibold text-lg">Wallets</h2>
+
+            <a href="{% url 'wallet_list' %}"
+               class="px-3 py-1 bg-indigo-600 rounded text-sm">
+               Tambahkan
+            </a>
+        </div>
+
+        <div class="space-y-2">
+
+            {% for w in wallets %}
+            <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+
+                <div>
+                    <div class="font-medium">{{ w.name }}</div>
+                    <div class="text-xs text-gray-400">
+                        Rp{{ w.initial_balance|intcomma }}
+                    </div>
+                </div>
+
+                <div class="flex gap-2 text-sm">
+
+                    <a href="{% url 'wallet_edit' w.id %}"
+                       class="text-yellow-400 hover:underline">
+                       Edit
+                    </a>
+
+                    <a href="{% url 'wallet_delete' w.id %}"
+                       class="text-red-400 hover:underline">
+                       Delete
+                    </a>
+
+                </div>
+
+            </div>
+            {% empty %}
+                <div class="text-gray-500">No wallets yet.</div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+    <!-- CATEGORY -->
+    <div class="bg-gray-800 p-5 rounded-xl shadow">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-semibold text-lg">Categories</h2>
+
+            <a href="{% url 'category_list' %}"
+               class="px-3 py-1 bg-indigo-600 rounded text-sm">
+               Tambahkan
+            </a>
+        </div>
+
+        <div class="space-y-2">
+
+            {% for c in categories %}
+            <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+
+                <div>
+                    <div class="font-medium">{{ c.name }}</div>
+
+                    <div class="text-xs
+                        {% if c.type == 'income' %}
+                            text-green-400
+                        {% else %}
+                            text-red-400
+                        {% endif %}
+                    ">
+                        {{ c.type|title }}
+                    </div>
+                </div>
+
+                <div class="flex gap-2 text-sm">
+
+                    <a href="/category/edit/{{ c.id }}"
+                       class="text-yellow-400 hover:underline">
+                       Edit
+                    </a>
+
+                    <a href="/category/delete/{{ c.id }}"
+                       class="text-red-400 hover:underline">
+                       Delete
+                    </a>
+
+                </div>
+
+            </div>
+            {% empty %}
+                <div class="text-gray-500">No categories yet.</div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

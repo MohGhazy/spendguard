@@ -1,14 +1,105 @@
-<h2>Wallets</h2>
-<a href="{% url 'wallet_add' %}">+ Add Wallet</a>
+{% extends 'base.html' %}
+{% load humanize %}
 
-<ul>
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Wallets</h1>
+
+<button id="addWalletBtn"
+class="mb-4 px-4 py-2 bg-indigo-600 rounded">
++ Add Wallet
+</button>
+
+<div class="space-y-2">
+
 {% for w in wallets %}
- <li>
-  {{ w.name }} ({{ w.initial_balance }})
-  <a href="{% url 'wallet_edit' w.id %}">Edit</a>
-  <a href="{% url 'wallet_delete' w.id %}">Delete</a>
- </li>
-{% empty %}
- <li>No wallets yet</li>
+<div class="flex justify-between bg-gray-800 p-3 rounded">
+
+    <div>
+        <div class="font-semibold">{{ w.name }}</div>
+        <div class="text-gray-400 text-sm">
+            Rp{{ w.initial_balance|intcomma }}
+        </div>
+    </div>
+
+</div>
 {% endfor %}
-</ul>
+
+</div>
+
+
+
+<!-- OVERLAY -->
+<div id="overlay"
+class="fixed inset-0 bg-black/60 hidden"></div>
+
+
+<!-- MODAL -->
+<div id="walletModal"
+class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
+
+<h2 class="text-lg font-semibold mb-4">
+Add Wallet
+</h2>
+
+<form method="POST" action="{% url 'wallet_add' %}">
+{% csrf_token %}
+
+<input name="name"
+placeholder="Wallet Name"
+class="w-full mb-3 p-2 bg-gray-800 rounded">
+
+<input name="initial_balance"
+type="number"
+placeholder="Initial Balance"
+class="w-full mb-4 p-2 bg-gray-800 rounded">
+
+<div class="flex justify-end gap-2">
+
+<button type="button"
+id="closeWallet"
+class="px-3 py-1 bg-gray-700 rounded">
+Cancel
+</button>
+
+<button class="px-3 py-1 bg-indigo-600 rounded">
+Save
+</button>
+
+</div>
+
+</form>
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_script %}
+
+<script>
+
+const btn = document.getElementById('addWalletBtn')
+const modal = document.getElementById('walletModal')
+const overlay = document.getElementById('overlay')
+const closeBtn = document.getElementById('closeWallet')
+
+btn.onclick = () => {
+    modal.classList.remove('hidden')
+    overlay.classList.remove('hidden')
+}
+
+closeBtn.onclick = () => {
+    modal.classList.add('hidden')
+    overlay.classList.add('hidden')
+}
+
+overlay.onclick = () => {
+    modal.classList.add('hidden')
+    overlay.classList.add('hidden')
+}
+
+</script>
+
+{% endblock %}

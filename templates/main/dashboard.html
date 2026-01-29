@@ -19,10 +19,10 @@
         {% endfor %}
     </select>
 
-    <button class="px-4 bg-indigo-600 rounded text-white">Apply</button>
+    <button class="px-4 bg-indigo-600 rounded text-white">Terapkan</button>
 </form>
 
-<div class="grid grid-cols-3 gap-3 mb-6">
+<div class="grid grid-cols-2 gap-3 mb-6">
     <div class="p-4 bg-gray-800 rounded">
         <div class="text-sm text-gray-400">Pemasukan</div>
         <div class="text-green-400 text-xl font-bold">{{ income_total|rupiah }}</div>
@@ -31,9 +31,15 @@
         <div class="text-sm text-gray-400">Pengeluaran</div>
         <div class="text-red-400 text-xl font-bold">{{ expense_total|rupiah }}</div>
     </div>
-    <div class="p-4 bg-gray-800 rounded">
-        <div class="text-sm text-gray-400">Saldo</div>
-        <div class="text-blue-400 text-xl font-bold">{{ balance|rupiah }}</div>
+</div>
+
+<div class="mb-6 p-5 rounded-2xl bg-indigo-600 text-white shadow-xl">
+    <div class="text-xl opacity-80">
+        Total Saldo
+    </div>
+
+    <div class="text-3xl font-bold tracking-wide">
+        {{ balance|rupiah }}
     </div>
 </div>
 
@@ -53,7 +59,7 @@
             {% for item in breakdown %}
             <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
                 <span>{{ item.name }}</span>
-                <span>Rp{{ item.value|intcomma }} ({{ item.pct }}%)</span>
+                <span>Rp.{{ item.value|floatformat:0|intcomma }}</span>
             </div>
             {% endfor %}
         </div>
@@ -76,7 +82,7 @@
             {% for w in wallet_breakdown %}
             <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
                 <span>{{ w.name }}</span>
-                <span>Rp{{ w.balance|floatformat:0|intcomma }}</span>
+                <span>Rp.{{ w.balance|floatformat:0|intcomma }}</span>
             </div>
             {% endfor %}
         </div>
@@ -97,7 +103,7 @@
             <div class="text-xs text-gray-400">{{ t.date }}</div>
         </div>
         <div class="font-semibold {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-            {% if t.type == 'income' %}+{% else %}-{% endif %}{{ t.amount }}
+            {% if t.type == 'income' %}+{% else %}-{% endif %}Rp.{{ t.amount|floatformat:0|intcomma }}
         </div>
     </div>
     {% empty %}
@@ -193,7 +199,7 @@ new Chart(ctx, {
                 label: (item, data) => {
                     let label = data.labels[item.index];
                     let val = data.datasets[0].data[item.index];
-                    return label + ": Rp" + val.toLocaleString('id-ID');
+                    return label + ": Rp." + val.toLocaleString('id-ID');
                 }
             }
         }
@@ -218,7 +224,7 @@ new Chart(ctx2, {
                 label: (item, data) => {
                     let label = data.labels[item.index];
                     let val = data.datasets[0].data[item.index];
-                    return label + ": Rp" + val.toLocaleString('id-ID');
+                    return label + ": Rp." + val.toLocaleString('id-ID');
                 }
             }
         }
