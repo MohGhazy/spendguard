@@ -1,66 +1,131 @@
 {% extends 'base.html' %}
 {% load currency %}
+
 {% block title %}Transactions{% endblock %}
 
 {% block content %}
-<div class="flex justify-between items-center mb-4">
- <h1 class="text-xl font-semibold">Transactions</h1>
- <button 
-  onclick="document.getElementById('addModal').showModal()"
-  class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500">
-  Add Transaction
- </button>
+
+<!-- HEADER -->
+<div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-wide">Transactions</h1>
+    <p class="text-gray-400 text-sm">
+        Lihat dan kelola semua transaksi keuangan Anda di sini.
+    </p>
 </div>
 
-<div class="space-y-2">
- {% for t in tx %}
- <div class="p-3 border border-gray-700 rounded flex justify-between">
-  <div>
-   <div class="font-medium">{{ t.category.name }}</div>
-   <div class="text-xs text-gray-400">{{ t.date }}</div>
-  </div>
-  <div class="font-semibold {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-   {% if t.type == 'income' %}+{% else %}-{% endif %}{{ t.amount|rupiah }}
-  </div>
-  <div class="flex gap-2">
-    <a href="{% url 'transaction_edit' t.id %}" class="text-blue-400">Edit</a>
-    <a href="{% url 'transaction_delete' t.id %}" class="text-red-400">Delete</a>
-  </div>
- </div>
- {% empty %}
- <div class="text-gray-400">No transactions yet</div>
- {% endfor %}
+
+<!-- INCOME TABLE -->
+<div class="mb-10">
+    <h2 class="text-lg font-semibold mb-3 text-green-400">
+        Pemasukan
+    </h2>
+
+    <div class="overflow-hidden rounded-xl border border-gray-700">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-800 text-gray-300">
+                    <tr>
+                        <th class="p-3 text-left">Tanggal</th>
+                        <th class="p-3 text-left">Kategori</th>
+                        <th class="p-3 text-left">Wallet</th>
+                        <th class="p-3 text-left">Catatan</th>
+                        <th class="p-3 text-right">Jumlah</th>
+                        <th class="p-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-700">
+                    {% for t in tx_income %}
+                    <tr class="hover:bg-gray-800/60 transition">
+                        <td class="p-3">{{ t.date }}</td>
+                        <td class="p-3">{{ t.category.name }}</td>
+                        <td class="p-3">{{ t.wallet.name }}</td>
+                        <td class="p-3 text-gray-400">
+                            {{ t.note|default:"-" }}
+                        </td>
+                        <td class="p-3 text-green-400 text-right font-semibold">
+                            {{ t.amount|rupiah }}
+                        </td>
+                        <td class="p-3 text-center">
+                            <a href="{% url 'transaction_edit' t.id %}" 
+                               class="text-blue-400 hover:text-blue-300 mr-3">
+                               Edit
+                            </a>
+                            <a href="{% url 'transaction_delete' t.id %}" 
+                               class="text-red-400 hover:text-red-300">
+                               Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-gray-500">
+                            Tidak ada pemasukan yang tercatat.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<dialog id="addModal" class="rounded-md p-5 bg-gray-800 text-gray-100">
- <form method="POST" action="{% url 'transaction_add' %}" class="space-y-3">
-  {% csrf_token %}
 
- <select name="type" class="w-full p-2 bg-gray-900 rounded border border-gray-700">
-  <option value="income">Income</option>
-  <option value="expense">Expense</option>
- </select>
 
- <select name="wallet" class="w-full p-2 bg-gray-900 rounded border border-gray-700">
-   {% for w in wallets %}
-   <option value="{{ w.id }}">{{ w.name }}</option>
-   {% endfor %}
- </select>
+<!-- EXPENSE TABLE -->
+<div>
+    <h2 class="text-lg font-semibold mb-3 text-red-400">
+        Pengeluaran
+    </h2>
 
-  <select name="category" class="w-full p-2 bg-gray-900 rounded border border-gray-700">
-   {% for c in categories %}
-   <option value="{{ c.id }}">{{ c.name }} ({{ c.type }})</option>
-   {% endfor %}
-  </select>
+    <div class="overflow-hidden rounded-xl border border-gray-700">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-800 text-gray-300">
+                    <tr>
+                        <th class="p-3 text-left">Tanggal</th>
+                        <th class="p-3 text-left">Kategori</th>
+                        <th class="p-3 text-left">Wallet</th>
+                        <th class="p-3 text-left">Catatan</th>
+                        <th class="p-3 text-right">Jumlah</th>
+                        <th class="p-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
 
- <input type="number" name="amount" placeholder="Amount" class="w-full p-2 bg-gray-900 rounded border border-gray-700"/>
- <input type="date" name="date" class="w-full p-2 bg-gray-900 rounded border border-gray-700"/>
- <textarea name="note" placeholder="Note (optional)" class="w-full p-2 bg-gray-900 rounded border border-gray-700"></textarea>
+                <tbody class="divide-y divide-gray-700">
+                    {% for t in tx_expense %}
+                    <tr class="hover:bg-gray-800/60 transition">
+                        <td class="p-3">{{ t.date }}</td>
+                        <td class="p-3">{{ t.category.name }}</td>
+                        <td class="p-3">{{ t.wallet.name }}</td>
+                        <td class="p-3 text-gray-400">
+                            {{ t.note|default:"-" }}
+                        </td>
+                        <td class="p-3 text-red-400 text-right font-semibold">
+                            {{ t.amount|rupiah }}
+                        </td>
+                        <td class="p-3 text-center">
+                            <a href="{% url 'transaction_edit' t.id %}" 
+                               class="text-blue-400 hover:text-blue-300 mr-3">
+                               Edit
+                            </a>
+                            <a href="{% url 'transaction_delete' t.id %}" 
+                               class="text-red-400 hover:text-red-300">
+                               Hapus
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-gray-500">
+                            Tidak ada pengeluaran yang tercatat.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
- <div class="flex gap-2 justify-end">
-  <button type="button" onclick="addModal.close()" class="px-3 py-2 border border-gray-600 rounded">Cancel</button>
-  <button type="submit" class="px-3 py-2 bg-indigo-600 rounded">Save</button>
- </div>
- </form>
-</dialog>
 {% endblock %}

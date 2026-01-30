@@ -15,10 +15,10 @@
         <div class="flex justify-between items-center mb-4">
             <h2 class="font-semibold text-lg">Wallets</h2>
 
-            <a href="{% url 'wallet_list' %}"
+            <button id="addWalletBtn"
                class="px-3 py-1 bg-indigo-600 rounded text-sm">
                Tambahkan
-            </a>
+            </button>
         </div>
 
         <div class="space-y-2">
@@ -28,17 +28,13 @@
 
                 <div>
                     <div class="font-medium">{{ w.name }}</div>
-                    <div class="text-xs text-gray-400">
-                        Rp{{ w.initial_balance|intcomma }}
-                    </div>
                 </div>
 
                 <div class="flex gap-2 text-sm">
 
-                    <a href="{% url 'wallet_edit' w.id %}"
-                       class="text-yellow-400 hover:underline">
+                    <button class="editWalletBtn text-yellow-400 hover:underline" data-id="{{ w.id }}" data-name="{{ w.name }}" data-balance="{{ w.initial_balance }}">
                        Edit
-                    </a>
+                    </button>
 
                     <a href="{% url 'wallet_delete' w.id %}"
                        class="text-red-400 hover:underline">
@@ -110,6 +106,153 @@
 
     </div>
 
+    <!-- OVERLAY -->
+    <div id="overlay"
+    class="fixed inset-0 bg-black/60 hidden"></div>
+
+
+    <!-- MODAL -->
+    <div id="walletModal"
+    class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
+
+        <h2 class="text-lg font-semibold mb-4">
+        Add Wallet
+        </h2>
+
+        <form method="POST" action="{% url 'wallet_add' %}">
+        {% csrf_token %}
+            <input name="name" placeholder="Wallet Name" class="w-full mb-3 p-2 bg-gray-800 rounded">
+            <input name="initial_balance" type="number" placeholder="Initial Balance" class="w-full mb-4 p-2 bg-gray-800 rounded">
+            <div class="flex justify-end gap-2">
+                <button type="button" id="closeWallet" class="px-3 py-1 bg-gray-700 rounded">
+                Cancel
+                </button>
+                <button class="px-3 py-1 bg-indigo-600 rounded">
+                Save
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="editWalletModal" class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
+
+        <h2 class="text-lg font-semibold mb-4">
+            Edit Wallet
+        </h2>
+
+        <form method="POST" id="editWalletForm">
+            {% csrf_token %}
+
+            <input id="editName" name="name" class="w-full mb-3 p-2 bg-gray-800 rounded">
+
+            <input id="editBalance" name="initial_balance" type="text" inputmode="numeric" placeholder="Rp. 0" class="w-full mb-4 p-2 bg-gray-800 rounded">
+
+            <div class="flex justify-end gap-2">
+                <button type="button" id="closeEditWallet"
+                    class="px-3 py-1 bg-gray-700 rounded">
+                    Cancel
+                </button>
+
+                <button class="px-3 py-1 bg-indigo-600 rounded">
+                    Update
+                </button>
+            </div>
+        </form>
+    </div>
+
+
 </div>
 
 {% endblock %}
+
+
+{% block extra_script%}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+// ADD WALLET MODAL
+const btn = document.getElementById('addWalletBtn')
+const modal = document.getElementById('walletModal')
+const overlay = document.getElementById('overlay')
+const closeBtn = document.getElementById('closeWallet')
+
+// ADD WALLET EVENTS
+btn.onclick = () => {
+   modal.classList.remove('hidden')
+   overlay.classList.remove('hidden')
+}
+
+overlay.onclick = () => {
+   modal.classList.add('hidden')
+   overlay.classList.add('hidden')
+}
+
+closeBtn.onclick = () => {
+   modal.classList.add('hidden')
+   overlay.classList.add('hidden')
+}
+
+})
+
+// EDIT WALLET MODAL
+const editButtons = document.querySelectorAll('.editWalletBtn')
+const editModal = document.getElementById('editWalletModal')
+const editForm = document.getElementById('editWalletForm')
+
+const editName = document.getElementById('editName')
+const editBalance = document.getElementById('editBalance')
+
+const closeEdit = document.getElementById('closeEditWallet')
+// EDIT WALLET EVENTS
+editButtons.forEach(btn => {
+
+    btn.onclick = () => {
+
+        const id = btn.dataset.id
+        const name = btn.dataset.name
+        const balance = btn.dataset.balance
+
+        editName.value = name
+        editBalance.value = formatRupiah(parseInt(balance).toString())
+
+        // 🔥 dynamic URL
+        editForm.action = `/settings/wallets/${id}/edit/`
+
+        editModal.classList.remove('hidden')
+        overlay.classList.remove('hidden')
+    }
+
+})
+
+editForm.addEventListener('submit', function(){
+
+    editBalance.value = editBalance.value.replace(/[^0-9]/g, '')
+
+})
+
+closeEdit.onclick = () => {
+    editModal.classList.add('hidden')
+    overlay.classList.add('hidden')
+}
+
+function formatRupiah(angka){
+    let number_string = angka.replace(/[^,\d]/g, '').toString()
+    let split = number_string.split(',')
+    let sisa = split[0].length % 3
+    let rupiah = split[0].substr(0, sisa)
+    let ribuan = split[0].substr(sisa).match(/\d{3}/gi)
+
+    if(ribuan){
+        let separator = sisa ? '.' : ''
+        rupiah += separator + ribuan.join('.')
+    }
+
+    return 'Rp. ' + rupiah
+}
+
+editBalance.addEventListener('input', function(){
+    this.value = formatRupiah(this.value)
+})
+</script>
+{% endblock extra_script%}
+    

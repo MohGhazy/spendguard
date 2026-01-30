@@ -172,62 +172,63 @@
         </div>
     </form>
 </div>
+
+{{ donut_labels|json_script:"donut-labels" }}
+{{ donut_values|json_script:"donut-values" }}
+{{ wallet_labels|json_script:"wallet-labels" }}
+{{ wallet_values|json_script:"wallet-values" }}
 {% endblock %}
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-var ctx = document.getElementById('expenseDonut').getContext('2d');
+const donutLabels = JSON.parse(
+    document.getElementById('donut-labels').textContent
+);
+
+const donutValues = JSON.parse(
+    document.getElementById('donut-values').textContent
+);
+
+const walletLabels = JSON.parse(
+    document.getElementById('wallet-labels').textContent
+);
+
+const walletValues = JSON.parse(
+    document.getElementById('wallet-values').textContent
+);
+
+const ctx = document.getElementById('expenseDonut');
 var ctx2 = document.getElementById('walletDonut').getContext('2d');
 
 new Chart(ctx, {
     type: 'doughnut',
     data: {
-        labels: {{ donut_labels|safe }},
+        labels: donutLabels,
         datasets: [{
-            data: {{ donut_values|safe }},
+            data: donutValues,
             backgroundColor: ['#ec4899','#3b82f6','#10b981','#f59e0b','#e11d48','#6366f1','#84cc16','#14b8a6'],
         }]
     },
     options: {
-        legend: { position: 'bottom', labels: { fontColor: 'white' } },
         responsive: true,
         maintainAspectRatio: false,
-        tooltips: {
-            callbacks: {
-                label: (item, data) => {
-                    let label = data.labels[item.index];
-                    let val = data.datasets[0].data[item.index];
-                    return label + ": Rp." + val.toLocaleString('id-ID');
-                }
-            }
-        }
     }
 });
 
 new Chart(ctx2, {
     type: 'doughnut',
     data: {
-        labels: {{ wallet_labels|safe }},
+        labels: walletLabels,
         datasets: [{
-            data: {{ wallet_values|safe }},
+            data: walletValues,
             backgroundColor: ['#10b981','#6366f1','#f59e0b','#ef4444','#3b82f6','#14b8a6','#e11d48','#84cc16'],
         }]
     },
     options: {
-        legend: { position: 'bottom', labels: { fontColor: 'white' } },
         responsive: true,
         maintainAspectRatio: false,
-        tooltips: {
-            callbacks: {
-                label: (item, data) => {
-                    let label = data.labels[item.index];
-                    let val = data.datasets[0].data[item.index];
-                    return label + ": Rp." + val.toLocaleString('id-ID');
-                }
-            }
-        }
     }
 });
 </script>

@@ -36,40 +36,27 @@ class="fixed inset-0 bg-black/60 hidden"></div>
 
 <!-- MODAL -->
 <div id="walletModal"
-class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
+class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
 
-<h2 class="text-lg font-semibold mb-4">
-Add Wallet
-</h2>
+    <h2 class="text-lg font-semibold mb-4">
+    Add Wallet
+    </h2>
 
-<form method="POST" action="{% url 'wallet_add' %}">
-{% csrf_token %}
+    <form method="POST" action="{% url 'wallet_add' %}">
+    {% csrf_token %}
 
-<input name="name"
-placeholder="Wallet Name"
-class="w-full mb-3 p-2 bg-gray-800 rounded">
+        <input name="name" placeholder="Wallet Name" class="w-full mb-3 p-2 bg-gray-800 rounded">
+        <input name="initial_balance" type="number" placeholder="Initial Balance" class="w-full mb-4 p-2 bg-gray-800 rounded">
+        <div class="flex justify-end gap-2">
+            <button type="button" id="closeWallet" class="px-3 py-1 bg-gray-700 rounded">
+            Cancel
+            </button>
+            <button class="px-3 py-1 bg-indigo-600 rounded">
+            Save
+            </button>
+        </div>
 
-<input name="initial_balance"
-type="number"
-placeholder="Initial Balance"
-class="w-full mb-4 p-2 bg-gray-800 rounded">
-
-<div class="flex justify-end gap-2">
-
-<button type="button"
-id="closeWallet"
-class="px-3 py-1 bg-gray-700 rounded">
-Cancel
-</button>
-
-<button class="px-3 py-1 bg-indigo-600 rounded">
-Save
-</button>
-
-</div>
-
-</form>
+    </form>
 </div>
 
 {% endblock %}
@@ -100,6 +87,9 @@ overlay.onclick = () => {
     overlay.classList.add('hidden')
 }
 
+function testClick(){
+   alert("JS HIDUP")
+}
 </script>
 
 {% endblock %}

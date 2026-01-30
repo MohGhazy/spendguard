@@ -1,8 +1,10 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from datetime import datetime, date
 from .models import Transaction, Wallet, Category, Profile
+from django.contrib import messages
 
 @login_required
 def dashboard_view(request):
@@ -25,8 +27,37 @@ def dashboard_view(request):
     expense_total = tx_all.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0
     initial_income = Wallet.objects.filter(user=user).aggregate(total=Sum('initial_balance'))['total'] or 0
     real_income = tx_all.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
-    income_total = float(initial_income) + float(real_income)
-    balance = income_total - float(expense_total)
+
+    # ALL TIME TRANSACTIONS (buat saldo)
+    all_tx = Transaction.objects.filter(user=user)
+
+    total_income_all = all_tx.filter(type='income').aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0')
+
+    total_expense_all = all_tx.filter(type='expense').aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0')
+
+    initial_balance = Wallet.objects.filter(user=user).aggregate(
+        total=Sum('initial_balance')
+    )['total'] or Decimal('0')
+
+    balance = initial_balance + total_income_all - total_expense_all
+
+    tx_month = Transaction.objects.filter(
+    user=user,
+    date__month=month,
+    date__year=year
+    )
+
+    monthly_income = tx_month.filter(type='income').aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0')
+
+    monthly_expense = tx_month.filter(type='expense').aggregate(
+        total=Sum('amount')
+    )['total'] or Decimal('0')
 
     # EXPENSE DONUT
     expense_group = (
@@ -81,8 +112,8 @@ def dashboard_view(request):
 
     context = {
         'tx': tx_recent,
-        'income_total': income_total,
-        'expense_total': expense_total,
+        'expense_total': monthly_expense,
+        'income_total': monthly_income,
         'balance': balance,
         'months': months,
         'years': years,
@@ -161,16 +192,25 @@ def onboard_expense(request):
 
 @login_required
 def transaction_list(request):
- user = request.user
+    user = request.user
 
- tx = Transaction.objects.filter(user=user).order_by('-date', '-id')
+    tx_income = Transaction.objects.filter(
+    user=user,
+    type='income'
+    ).order_by('-date', '-id')
 
- context = {
-  'tx': tx,
-  'wallets': Wallet.objects.filter(user=user),
-  'categories': Category.objects.filter(user=user),
- }
- return render(request, 'main/transactions.html', context)
+    tx_expense = Transaction.objects.filter(
+        user=user,
+        type='expense'
+    ).order_by('-date', '-id')
+
+    context = {
+    'tx_income': tx_income,
+    'tx_expense': tx_expense,
+    'wallets': Wallet.objects.filter(user=user),
+    'categories': Category.objects.filter(user=user),
+    }
+    return render(request, 'main/transactions.html', context)
 
 @login_required
 def transaction_add(request):
@@ -231,14 +271,13 @@ def transaction_delete(request, tx_id):
 
 @login_required
 def settings_home(request):
-    wallets = Wallet.objects.filter(user=request.user).order_by('name')
-    categories = Category.objects.filter(user=request.user).order_by('type', 'name')
+    wallets = Wallet.objects.filter(user=request.user)
+    categories = Category.objects.filter(user=request.user)
 
-    context = {
+    return render(request,'main/settings_home.html',{
         'wallets': wallets,
-        'categories': categories,
-    }
-    return render(request, 'main/settings_home.html', context)
+        'categories': categories
+    })
 
 @login_required
 def wallet_list(request):
@@ -256,7 +295,8 @@ def wallet_add(request):
    name=request.POST['name'],
    initial_balance=request.POST.get('initial_balance', 0)
   )
-  return redirect('wallet_list')
+  messages.success(request, "Wallet Berhasil Ditambahkan.")
+  return redirect('settings_home')
 
  return render(request, 'main/wallet_form.html')
 
@@ -268,14 +308,15 @@ def wallet_edit(request, id):
   w.name = request.POST['name']
   w.initial_balance = request.POST.get('initial_balance', 0)
   w.save()
-  return redirect('wallet_list')
+  return redirect('settings_home')
 
  return render(request, 'main/wallet_form.html', {'wallet': w})
 
 @login_required
 def wallet_delete(request, id):
- Wallet.objects.get(id=id, user=request.user).delete()
- return redirect('wallet_list')
+    Wallet.objects.get(id=id, user=request.user).delete()
+    messages.success(request, "Wallet deleted successfully.")
+    return redirect('settings_home')
 
 @login_required
 def category_list(request):
