@@ -7,18 +7,44 @@
 
 <!-- HEADER -->
 <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-wide">Transactions</h1>
+    <h1 class="text-2xl font-bold tracking-wide">Halaman Transaksi</h1>
     <p class="text-gray-400 text-sm">
         Lihat dan kelola semua transaksi keuangan Anda di sini.
     </p>
 </div>
 
+<!-- ADD BUTTON -->
+<button id="addBtn"
+    class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white text-3xl shadow-lg flex items-center justify-center shadow-xl">
+    +
+</button>
+
+<!-- FILTER -->
+<form method="GET" class="flex flex-wrap gap-3 mb-6">
+    <select name="month" class="p-2 bg-gray-800 rounded">
+        {% for m, label in months %}
+        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
+            {{ label }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <select name="year" class="p-2 bg-gray-800 rounded">
+        {% for y in years %}
+        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+            {{ y }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <button class="px-4 bg-indigo-600 rounded text-white">
+        Terapkan
+    </button>
+</form>
 
 <!-- INCOME TABLE -->
 <div class="mb-10">
-    <h2 class="text-lg font-semibold mb-3 text-green-400">
-        Pemasukan
-    </h2>
+    <h2 class="text-lg font-semibold mb-3 text-green-400">Pemasukan</h2>
 
     <div class="overflow-hidden rounded-xl border border-gray-700">
         <div class="overflow-x-auto">
@@ -33,83 +59,18 @@
                         <th class="p-3 text-center">Aksi</th>
                     </tr>
                 </thead>
-
                 <tbody class="divide-y divide-gray-700">
                     {% for t in tx_income %}
                     <tr class="hover:bg-gray-800/60 transition">
                         <td class="p-3">{{ t.date }}</td>
                         <td class="p-3">{{ t.category.name }}</td>
                         <td class="p-3">{{ t.wallet.name }}</td>
-                        <td class="p-3 text-gray-400">
-                            {{ t.note|default:"-" }}
-                        </td>
+                        <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
                         <td class="p-3 text-green-400 text-right font-semibold">
                             {{ t.amount|rupiah }}
                         </td>
                         <td class="p-3 text-center">
-                            <a href="{% url 'transaction_edit' t.id %}" 
-                               class="text-blue-400 hover:text-blue-300 mr-3">
-                               Edit
-                            </a>
-                            <a href="{% url 'transaction_delete' t.id %}" 
-                               class="text-red-400 hover:text-red-300">
-                               Delete
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-gray-500">
-                            Tidak ada pemasukan yang tercatat.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- EXPENSE TABLE -->
-<div>
-    <h2 class="text-lg font-semibold mb-3 text-red-400">
-        Pengeluaran
-    </h2>
-
-    <div class="overflow-hidden rounded-xl border border-gray-700">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-800 text-gray-300">
-                    <tr>
-                        <th class="p-3 text-left">Tanggal</th>
-                        <th class="p-3 text-left">Kategori</th>
-                        <th class="p-3 text-left">Wallet</th>
-                        <th class="p-3 text-left">Catatan</th>
-                        <th class="p-3 text-right">Jumlah</th>
-                        <th class="p-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody class="divide-y divide-gray-700">
-                    {% for t in tx_expense %}
-                    <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3">{{ t.date }}</td>
-                        <td class="p-3">{{ t.category.name }}</td>
-                        <td class="p-3">{{ t.wallet.name }}</td>
-                        <td class="p-3 text-gray-400">
-                            {{ t.note|default:"-" }}
-                        </td>
-                        <td class="p-3 text-red-400 text-right font-semibold">
-                            {{ t.amount|rupiah }}
-                        </td>
-                        <td class="p-3 text-center">
-                            <a href="{% url 'transaction_edit' t.id %}" 
-                               class="text-blue-400 hover:text-blue-300 mr-3">
-                               Edit
-                            </a>
-                            <a href="{% url 'transaction_delete' t.id %}" 
+                            <a href="{% url 'transaction_delete' t.id %}"
                                class="text-red-400 hover:text-red-300">
                                Hapus
                             </a>
@@ -118,7 +79,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="6" class="p-4 text-center text-gray-500">
-                            Tidak ada pengeluaran yang tercatat.
+                            Tidak ada pemasukan.
                         </td>
                     </tr>
                     {% endfor %}
@@ -128,4 +89,182 @@
     </div>
 </div>
 
+<!-- EXPENSE TABLE -->
+<div>
+    <h2 class="text-lg font-semibold mb-3 text-red-400">Pengeluaran</h2>
+
+    <div class="overflow-hidden rounded-xl border border-gray-700">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-800 text-gray-300">
+                    <tr>
+                        <th class="p-3 text-left">Tanggal</th>
+                        <th class="p-3 text-left">Kategori</th>
+                        <th class="p-3 text-left">Wallet</th>
+                        <th class="p-3 text-left">Catatan</th>
+                        <th class="p-3 text-right">Jumlah</th>
+                        <th class="p-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for t in tx_expense %}
+                    <tr class="hover:bg-gray-800/60 transition">
+                        <td class="p-3">{{ t.date }}</td>
+                        <td class="p-3">{{ t.category.name }}</td>
+                        <td class="p-3">{{ t.wallet.name }}</td>
+                        <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
+                        <td class="p-3 text-red-400 text-right font-semibold">
+                            {{ t.amount|rupiah }}
+                        </td>
+                        <td class="p-3 text-center">
+                            <a href="{% url 'transaction_delete' t.id %}"
+                               class="text-red-400 hover:text-red-300">
+                               Hapus
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-gray-500">
+                            Tidak ada pengeluaran.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden opacity-0 transition-opacity duration-200">
+</div>
+
+<!-- ADD TRANSACTION SHEET -->
+<div id="sheet"
+    class="fixed left-0 right-0 bottom-0 bg-gray-900 rounded-t-2xl shadow-xl p-5 hidden translate-y-full opacity-0 transition-all duration-200">
+
+    <h2 class="text-lg font-semibold mb-3">Tambah Transaksi</h2>
+
+    <form method="POST" action="{% url 'transaction_add' %}">
+        {% csrf_token %}
+
+        <input type="text" id="addAmountDisplay" class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700" placeholder="Rp 0">
+        <input type="hidden" name="amount" id="addAmount">
+
+        <select name="type" id="addType"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            <option value="expense" selected>Expense</option>
+            <option value="income">Income</option>
+        </select>
+
+        <select name="wallet"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            {% for w in wallets %}
+            <option value="{{ w.id }}">{{ w.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="category" id="addCategorySelect"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+            {% for c in categories_income %}
+            <option value="{{ c.id }}" data-type="income">{{ c.name }}</option>
+            {% endfor %}
+            {% for c in categories_expense %}
+            <option value="{{ c.id }}" data-type="expense">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="date" name="date"
+            value="{{ today }}"
+            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+
+        <input type="text" name="note" placeholder="Catatan (opsional)"
+            class="w-full mb-5 p-2 bg-gray-800 rounded border border-gray-700">
+
+        <div class="flex justify-between">
+            <button type="button" id="cancelBtn"
+                class="px-4 py-2 rounded border border-gray-600 text-gray-300">
+                Cancel
+            </button>
+            <button type="submit"
+                class="px-4 py-2 rounded bg-indigo-600 text-white font-semibold">
+                Save
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+const btn = document.getElementById('addBtn');
+const overlay = document.getElementById('overlay');
+const sheet = document.getElementById('sheet');
+const cancel = document.getElementById('cancelBtn');
+
+function openSheet() {
+    overlay.classList.remove('hidden');
+    sheet.classList.remove('hidden');
+
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        sheet.classList.remove('opacity-0', 'translate-y-full');
+    });
+}
+
+function closeSheet() {
+    overlay.classList.add('opacity-0');
+    sheet.classList.add('opacity-0', 'translate-y-full');
+
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        sheet.classList.add('hidden');
+    }, 200);
+}
+
+btn.onclick = openSheet;
+overlay.onclick = closeSheet;
+cancel.onclick = closeSheet;
+
+// 🔥 FILTER CATEGORY
+const typeSelect = document.getElementById('addType');
+const categorySelect = document.getElementById('addCategorySelect');
+
+function filterCategory() {
+    const type = typeSelect.value;
+    const options = categorySelect.querySelectorAll('option');
+
+    options.forEach(opt => {
+        opt.hidden = opt.dataset.type !== type;
+    });
+
+    const first = [...options].find(o => o.dataset.type === type);
+    if (first) categorySelect.value = first.value;
+}
+
+typeSelect.addEventListener('change', filterCategory);
+filterCategory();
+
+function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID').format(angka);
+}
+
+const amountDisplayAdd = document.getElementById('addAmountDisplay');
+const amountHiddenAdd  = document.getElementById('addAmount');
+
+if (amountDisplayAdd && amountHiddenAdd) {
+    amountDisplayAdd.addEventListener('input', function () {
+        let raw = this.value.replace(/\D/g, '');
+
+        // simpan angka murni ke hidden input
+        amountHiddenAdd.value = raw;
+
+        // tampilkan format rupiah
+        this.value = raw ? 'Rp ' + formatRupiah(raw) : '';
+    });
+}
+</script>
 {% endblock %}

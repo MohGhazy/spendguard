@@ -5,7 +5,12 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">Settings</h1>
+<div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-wide">Halaman Pengaturan</h1>
+    <p class="text-gray-400 text-sm">
+        Lihat dan kelola wallet serta kategori Anda di sini.
+    </p>
+</div>
 
 <div class="grid md:grid-cols-2 gap-6">
 
@@ -38,14 +43,14 @@
 
                     <a href="{% url 'wallet_delete' w.id %}"
                        class="text-red-400 hover:underline">
-                       Delete
+                       Hapus
                     </a>
 
                 </div>
 
             </div>
             {% empty %}
-                <div class="text-gray-500">No wallets yet.</div>
+                <div class="text-gray-500">Tidak ada wallet.</div>
             {% endfor %}
 
         </div>
@@ -56,12 +61,11 @@
     <div class="bg-gray-800 p-5 rounded-xl shadow">
 
         <div class="flex justify-between items-center mb-4">
-            <h2 class="font-semibold text-lg">Categories</h2>
+            <h2 class="font-semibold text-lg">Kategori</h2>
 
-            <a href="{% url 'category_list' %}"
-               class="px-3 py-1 bg-indigo-600 rounded text-sm">
-               Tambahkan
-            </a>
+            <button id="addCategoryBtn" class="px-3 py-1 bg-indigo-600 rounded text-sm">
+            Tambahkan
+            </button>
         </div>
 
         <div class="space-y-2">
@@ -78,28 +82,31 @@
                         {% else %}
                             text-red-400
                         {% endif %}
-                    ">
-                        {{ c.type|title }}
+                    ">{% if c.type == 'income' %}
+                        Pemasukan
+                    {% else %}
+                        Pengeluaran
+                    {% endif %}
+                        {{ title }}
                     </div>
                 </div>
 
                 <div class="flex gap-2 text-sm">
 
-                    <a href="/category/edit/{{ c.id }}"
-                       class="text-yellow-400 hover:underline">
-                       Edit
-                    </a>
+                    <button class="editCategoryBtn text-yellow-400 hover:underline" data-id="{{ c.id }}" data-name="{{ c.name }}" data-type="{{ c.type }}">
+                    Edit
+                    </button>
 
-                    <a href="/category/delete/{{ c.id }}"
+                    <a href="{% url 'category_delete' c.id %}"
                        class="text-red-400 hover:underline">
-                       Delete
+                       Hapus
                     </a>
 
                 </div>
 
             </div>
             {% empty %}
-                <div class="text-gray-500">No categories yet.</div>
+                <div class="text-gray-500">Tidak ada kategori.</div>
             {% endfor %}
 
         </div>
@@ -116,7 +123,7 @@
     class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
 
         <h2 class="text-lg font-semibold mb-4">
-        Add Wallet
+        Tambahkan Wallet
         </h2>
 
         <form method="POST" action="{% url 'wallet_add' %}">
@@ -125,10 +132,10 @@
             <input name="initial_balance" type="number" placeholder="Initial Balance" class="w-full mb-4 p-2 bg-gray-800 rounded">
             <div class="flex justify-end gap-2">
                 <button type="button" id="closeWallet" class="px-3 py-1 bg-gray-700 rounded">
-                Cancel
+                Batal
                 </button>
                 <button class="px-3 py-1 bg-indigo-600 rounded">
-                Save
+                Simpan
                 </button>
             </div>
         </form>
@@ -150,17 +157,74 @@
             <div class="flex justify-end gap-2">
                 <button type="button" id="closeEditWallet"
                     class="px-3 py-1 bg-gray-700 rounded">
-                    Cancel
+                    Batal
                 </button>
 
                 <button class="px-3 py-1 bg-indigo-600 rounded">
-                    Update
+                    Perbarui
                 </button>
             </div>
         </form>
     </div>
+    <div id="editCategoryModal" class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
 
+        <h2 class="text-lg font-semibold mb-4">
+            Edit Kategori
+        </h2>
 
+        <form method="POST" id="editCategoryForm">
+            {% csrf_token %}
+
+            <input id="editCategoryName" name="name" class="w-full mb-3 p-2 bg-gray-800 rounded" placeholder="Category name">
+
+            <select id="editCategoryType" name="type" class="w-full mb-4 p-2 bg-gray-800 rounded">
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+            </select>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" id="closeEditCategory" class="px-3 py-1 bg-gray-700 rounded">
+                    Batal
+                </button>
+
+                <button class="px-3 py-1 bg-indigo-600 rounded">
+                    Perbarui
+                </button>
+            </div>
+        </form>
+    </div>
+    <div id="addCategoryModal" class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 p-6 rounded-xl w-96 hidden shadow-2xl">
+
+        <h2 class="text-lg font-semibold mb-4">
+            Tambahkan Kategori
+        </h2>
+
+        <form method="POST" action="{% url 'category_add' %}">
+            {% csrf_token %}
+
+            <input name="name"
+                class="w-full mb-3 p-2 bg-gray-800 rounded"
+                placeholder="Category name"
+                required>
+
+            <select name="type"
+                    class="w-full mb-4 p-2 bg-gray-800 rounded">
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+            </select>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" id="closeAddCategory"
+                    class="px-3 py-1 bg-gray-700 rounded">
+                    Batal
+                </button>
+
+                <button class="px-3 py-1 bg-indigo-600 rounded">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 {% endblock %}
@@ -253,6 +317,53 @@ function formatRupiah(angka){
 editBalance.addEventListener('input', function(){
     this.value = formatRupiah(this.value)
 })
+
+// ADD CATEGORY MODAL
+const addCategoryBtn = document.getElementById('addCategoryBtn')
+const addCategoryModal = document.getElementById('addCategoryModal')
+const closeAddCategory = document.getElementById('closeAddCategory')
+
+addCategoryBtn.onclick = () => {
+    addCategoryModal.classList.remove('hidden')
+    overlay.classList.remove('hidden')
+}
+
+closeAddCategory.onclick = () => {
+    addCategoryModal.classList.add('hidden')
+    overlay.classList.add('hidden')
+}
+
+// EDIT CATEGORY MODAL
+const categoryButtons = document.querySelectorAll('.editCategoryBtn')
+const categoryModal = document.getElementById('editCategoryModal')
+const categoryForm = document.getElementById('editCategoryForm')
+
+const editCategoryName = document.getElementById('editCategoryName')
+const editCategoryType = document.getElementById('editCategoryType')
+const closeCategoryBtn = document.getElementById('closeEditCategory')
+
+categoryButtons.forEach(btn => {
+    btn.onclick = () => {
+
+        const id = btn.dataset.id
+        const name = btn.dataset.name
+        const type = btn.dataset.type
+
+        editCategoryName.value = name
+        editCategoryType.value = type
+
+        // 🔥 URL Django yang BENAR
+        categoryForm.action = `/settings/categories/${id}/edit/`
+
+        categoryModal.classList.remove('hidden')
+        overlay.classList.remove('hidden')
+    }
+})
+
+closeCategoryBtn.onclick = () => {
+    categoryModal.classList.add('hidden')
+    overlay.classList.add('hidden')
+}
 </script>
 {% endblock extra_script%}
     

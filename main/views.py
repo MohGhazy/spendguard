@@ -193,23 +193,49 @@ def onboard_expense(request):
 @login_required
 def transaction_list(request):
     user = request.user
+    now = datetime.now()
+
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+
+    month = int(month) if month else now.month
+    year = int(year) if year else now.year
 
     tx_income = Transaction.objects.filter(
-    user=user,
-    type='income'
+        user=user,
+        type='income',
+        date__month=month,
+        date__year=year
     ).order_by('-date', '-id')
 
     tx_expense = Transaction.objects.filter(
         user=user,
-        type='expense'
+        type='expense',
+        date__month=month,
+        date__year=year
     ).order_by('-date', '-id')
 
     context = {
-    'tx_income': tx_income,
-    'tx_expense': tx_expense,
-    'wallets': Wallet.objects.filter(user=user),
-    'categories': Category.objects.filter(user=user),
+        'tx_income': tx_income,
+        'tx_expense': tx_expense,
+
+        'months': [
+            (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+            (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+            (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+        ],
+        'years': list(range(now.year - 3, now.year + 1)),
+        'selected_month': month,
+        'selected_year': year,
+
+        # 🔥 INI WAJIB ADA
+        'wallets': Wallet.objects.filter(user=user),
+        'categories_income': Category.objects.filter(user=user, type='income'),
+        'categories_expense': Category.objects.filter(user=user, type='expense'),
+        'categories': Category.objects.filter(user=user),  # edit modal
+        'today': date.today().strftime('%Y-%m-%d'),
     }
+
     return render(request, 'main/transactions.html', context)
 
 @login_required
@@ -267,6 +293,7 @@ def transaction_edit(request, tx_id):
 def transaction_delete(request, tx_id):
  tx = Transaction.objects.get(id=tx_id, user=request.user)
  tx.delete()
+ messages.success(request, "Transaksi berhasil dihapus.")
  return redirect('transactions')
 
 @login_required
@@ -315,7 +342,7 @@ def wallet_edit(request, id):
 @login_required
 def wallet_delete(request, id):
     Wallet.objects.get(id=id, user=request.user).delete()
-    messages.success(request, "Wallet deleted successfully.")
+    messages.success(request, "Wallet berhasil dihapus.")
     return redirect('settings_home')
 
 @login_required
@@ -331,7 +358,7 @@ def category_add(request):
    name=request.POST['name'],
    type=request.POST['type'],
   )
-  return redirect('category_list')
+  return redirect('settings_home')
 
  return render(request, 'main/category_form.html')
 
@@ -342,11 +369,12 @@ def category_edit(request, id):
   c.name = request.POST['name']
   c.type = request.POST['type']
   c.save()
-  return redirect('category_list')
+  return redirect('settings_home')
 
  return render(request, 'main/category_form.html', {'category': c})
 
 @login_required
 def category_delete(request, id):
  Category.objects.get(id=id, user=request.user).delete()
- return redirect('category_list')
+ messages.success(request, "Kategori berhasil dihapus.")
+ return redirect('settings_home')
