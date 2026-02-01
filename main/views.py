@@ -165,30 +165,29 @@ def onboard_income(request):
 
   return redirect('onboard_expense')
 
- income_defaults = ['Salary', 'Bonus', 'Freelance', 'Investment']
+ income_defaults = ['Gajian', 'Beasiswa', 'Investasi']
  return render(request, 'main/onboard_income.html', {'defaults': income_defaults})
-
 
 @login_required
 def onboard_expense(request):
- if request.method == 'POST':
-  selected = request.POST.getlist('categories')
-  custom = request.POST.get('custom')
+    if request.method == 'POST':
+        selected = request.POST.getlist('categories')
+        custom = request.POST.get('custom')
 
-  for cat in selected:
-   Category.objects.create(user=request.user, name=cat, type='expense')
+        for cat in selected:
+            Category.objects.create(user=request.user, name=cat, type='expense')
 
-  if custom:
-   Category.objects.create(user=request.user, name=custom, type='expense')
+        if custom:
+            Category.objects.create(user=request.user, name=custom, type='expense')
 
-  profile = Profile.objects.get(user=request.user)
-  profile.is_onboarded = True
-  profile.save()
+        profile = Profile.objects.get(user=request.user)
+        profile.is_onboarded = True
+        profile.save()
 
-  return redirect('dashboard')
+        return redirect('dashboard')
 
- expense_defaults = ['Food', 'Transport', 'Bills', 'Rent', 'Shopping', 'Health']
- return render(request, 'main/onboard_expense.html', {'defaults': expense_defaults})
+    expense_defaults = ['Makan', 'Belanja', 'Hiburan']
+    return render(request, 'main/onboard_expense.html', {'defaults': expense_defaults})
 
 @login_required
 def transaction_list(request):
@@ -214,10 +213,26 @@ def transaction_list(request):
         date__month=month,
         date__year=year
     ).order_by('-date', '-id')
+    
+    wallets = Wallet.objects.filter(user=user)
+
+    wallet_balances = {}
+    for w in wallets:
+        income = Transaction.objects.filter(wallet=w, type='income').aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        expense = Transaction.objects.filter(wallet=w, type='expense').aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        real_balance = w.initial_balance + income - expense
+        wallet_balances[w.id] = real_balance
 
     context = {
         'tx_income': tx_income,
         'tx_expense': tx_expense,
+        'wallet_balances': wallet_balances,
 
         'months': [
             (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
@@ -240,61 +255,61 @@ def transaction_list(request):
 
 @login_required
 def transaction_add(request):
- if request.method == 'POST':
-  user = request.user
-  wallet = Wallet.objects.get(id=request.POST['wallet'])
-  category = Category.objects.get(id=request.POST['category'])
-  amount = request.POST['amount']
-  tx_type = request.POST['type']
-  date = request.POST['date']
-  note = request.POST.get('note', '')
+    if request.method == 'POST':
+        user = request.user
+        wallet = Wallet.objects.get(id=request.POST['wallet'])
+        category = Category.objects.get(id=request.POST['category'])
+        amount = request.POST['amount']
+        tx_type = request.POST['type']
+        date = request.POST['date']
+        note = request.POST.get('note', '')
 
-  Transaction.objects.create(
-   user=user,
-   wallet=wallet,
-   category=category,
-   type=tx_type,
-   amount=amount,
-   date=date,
-   note=note,
-  )
+        Transaction.objects.create(
+        user=user,
+        wallet=wallet,
+        category=category,
+        type=tx_type,
+        amount=amount,
+        date=date,
+        note=note,
+        )
 
-  return redirect('transactions')
+        return redirect('transactions')
 
- context = {
-  'wallets': Wallet.objects.filter(user=request.user),
-  'categories': Category.objects.filter(user=request.user),
- }
- return render(request, 'main/transaction_add.html', context)
+    context = {
+    'wallets': Wallet.objects.filter(user=request.user),
+    'categories': Category.objects.filter(user=request.user),
+    }
+    return render(request, 'main/transaction_add.html', context)
 
 @login_required
 def transaction_edit(request, tx_id):
- tx = Transaction.objects.get(id=tx_id, user=request.user)
+    tx = Transaction.objects.get(id=tx_id, user=request.user)
 
- if request.method == 'POST':
-  tx.type = request.POST['type']
-  tx.wallet_id = request.POST['wallet']
-  tx.category_id = request.POST['category']
-  tx.amount = request.POST['amount']
-  tx.date = request.POST['date']
-  tx.note = request.POST.get('note', '')
-  tx.save()
+    if request.method == 'POST':
+        tx.type = request.POST['type']
+        tx.wallet_id = request.POST['wallet']
+        tx.category_id = request.POST['category']
+        tx.amount = request.POST['amount']
+        tx.date = request.POST['date']
+        tx.note = request.POST.get('note', '')
+        tx.save()
 
-  return redirect('transactions')
+        return redirect('transactions')
 
- context = {
-  'tx': tx,
-  'wallets': Wallet.objects.filter(user=request.user),
-  'categories': Category.objects.filter(user=request.user),
- }
- return render(request, 'main/transaction_edit.html', context)
+    context = {
+    'tx': tx,
+    'wallets': Wallet.objects.filter(user=request.user),
+    'categories': Category.objects.filter(user=request.user),
+    }
+    return render(request, 'main/transaction_edit.html', context)
 
 @login_required
 def transaction_delete(request, tx_id):
- tx = Transaction.objects.get(id=tx_id, user=request.user)
- tx.delete()
- messages.success(request, "Transaksi berhasil dihapus.")
- return redirect('transactions')
+    tx = Transaction.objects.get(id=tx_id, user=request.user)
+    tx.delete()
+    messages.success(request, "Transaksi berhasil dihapus.")
+    return redirect('transactions')
 
 @login_required
 def settings_home(request):
@@ -316,28 +331,28 @@ def wallet_list(request):
 
 @login_required
 def wallet_add(request):
- if request.method == 'POST':
-  Wallet.objects.create(
-   user=request.user,
-   name=request.POST['name'],
-   initial_balance=request.POST.get('initial_balance', 0)
-  )
-  messages.success(request, "Wallet Berhasil Ditambahkan.")
-  return redirect('settings_home')
+    if request.method == 'POST':
+        Wallet.objects.create(
+        user=request.user,
+        name=request.POST['name'],
+        initial_balance=request.POST.get('initial_balance', 0)
+        )
+        messages.success(request, "Wallet Berhasil Ditambahkan.")
+        return redirect('settings_home')
 
- return render(request, 'main/wallet_form.html')
+    return render(request, 'main/wallet_form.html')
 
 @login_required
 def wallet_edit(request, id):
- w = Wallet.objects.get(id=id, user=request.user)
+    w = Wallet.objects.get(id=id, user=request.user)
 
- if request.method == 'POST':
-  w.name = request.POST['name']
-  w.initial_balance = request.POST.get('initial_balance', 0)
-  w.save()
-  return redirect('settings_home')
+    if request.method == 'POST':
+        w.name = request.POST['name']
+        w.initial_balance = request.POST.get('initial_balance', 0)
+        w.save()
+        return redirect('settings_home')
 
- return render(request, 'main/wallet_form.html', {'wallet': w})
+    return render(request, 'main/wallet_form.html', {'wallet': w})
 
 @login_required
 def wallet_delete(request, id):
@@ -347,34 +362,34 @@ def wallet_delete(request, id):
 
 @login_required
 def category_list(request):
- categories = Category.objects.filter(user=request.user)
- return render(request, 'main/category_list.html', {'categories': categories})
+    categories = Category.objects.filter(user=request.user)
+    return render(request, 'main/category_list.html', {'categories': categories})
 
 @login_required
 def category_add(request):
- if request.method == 'POST':
-  Category.objects.create(
-   user=request.user,
-   name=request.POST['name'],
-   type=request.POST['type'],
-  )
-  return redirect('settings_home')
+    if request.method == 'POST':
+        Category.objects.create(
+        user=request.user,
+        name=request.POST['name'],
+        type=request.POST['type'],
+        )
+        return redirect('settings_home')
 
- return render(request, 'main/category_form.html')
+    return render(request, 'main/category_form.html')
 
 @login_required
 def category_edit(request, id):
- c = Category.objects.get(id=id, user=request.user)
- if request.method == 'POST':
-  c.name = request.POST['name']
-  c.type = request.POST['type']
-  c.save()
-  return redirect('settings_home')
+    c = Category.objects.get(id=id, user=request.user)
+    if request.method == 'POST':
+        c.name = request.POST['name']
+        c.type = request.POST['type']
+        c.save()
+        return redirect('settings_home')
 
- return render(request, 'main/category_form.html', {'category': c})
+    return render(request, 'main/category_form.html', {'category': c})
 
 @login_required
 def category_delete(request, id):
- Category.objects.get(id=id, user=request.user).delete()
- messages.success(request, "Kategori berhasil dihapus.")
- return redirect('settings_home')
+    Category.objects.get(id=id, user=request.user).delete()
+    messages.success(request, "Kategori berhasil dihapus.")
+    return redirect('settings_home')

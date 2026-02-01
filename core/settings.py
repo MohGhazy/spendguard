@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'main.apps.MainConfig',
     'django.contrib.humanize',
+    'main.templatetags.extras',
 ]
 
 MIDDLEWARE = [

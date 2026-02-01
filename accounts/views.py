@@ -10,7 +10,7 @@ def register_view(request):
         
         user = User.objects.create_user(username=username, password=password)
         login(request, user)
-        return redirect('dashboard')  # dashboard nanti kita setup
+        return redirect('dashboard')
 
     return render(request, 'accounts/register.html')
 

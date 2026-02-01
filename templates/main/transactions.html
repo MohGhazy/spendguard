@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load currency %}
+{% load extras %}
 
 {% block title %}Transactions{% endblock %}
 
@@ -74,6 +75,10 @@
                                class="text-red-400 hover:text-red-300">
                                Hapus
                             </a>
+                            <a href="{% url 'transaction_edit' t.id %}"
+                               class="text-blue-400 hover:text-blue-300 ml-2">
+                               Edit
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
@@ -121,6 +126,10 @@
                                class="text-red-400 hover:text-red-300">
                                Hapus
                             </a>
+                            <a href="{% url 'transaction_edit' t.id %}"
+                               class="text-blue-400 hover:text-blue-300 ml-2">
+                               Edit
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
@@ -150,19 +159,25 @@
     <form method="POST" action="{% url 'transaction_add' %}">
         {% csrf_token %}
 
-        <input type="text" id="addAmountDisplay" class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700" placeholder="Rp 0">
+        <input type="text" id="addAmountDisplay" class="w-full mb-2 p-2 bg-gray-800 rounded border border-gray-700" placeholder="Rp 0">
+        <p id="balanceWarning" class="text-red-400 text-sm hidden mb-2">
+            Saldo wallet tidak mencukupi
+        </p>
         <input type="hidden" name="amount" id="addAmount">
 
         <select name="type" id="addType"
             class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
-            <option value="expense" selected>Expense</option>
-            <option value="income">Income</option>
+            <option value="expense" selected>Pengeluaran</option>
+            <option value="income">Pemasukan</option>
         </select>
 
         <select name="wallet"
+            id="addWallet"
             class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
             {% for w in wallets %}
-            <option value="{{ w.id }}">{{ w.name }}</option>
+            <option value="{{ w.id }}" data-balance="{{ wallet_balances|get_item:w.id }}">
+                {{ w.name }}
+            </option>
             {% endfor %}
         </select>
 
@@ -213,6 +228,8 @@ function openSheet() {
         overlay.classList.remove('opacity-0');
         sheet.classList.remove('opacity-0', 'translate-y-full');
     });
+
+    checkBalance();
 }
 
 function closeSheet() {
@@ -264,7 +281,41 @@ if (amountDisplayAdd && amountHiddenAdd) {
 
         // tampilkan format rupiah
         this.value = raw ? 'Rp ' + formatRupiah(raw) : '';
+
+        checkBalance();
     });
 }
+
+const typeSelectAdd   = document.getElementById('addType');
+const walletSelectAdd = document.getElementById('addWallet');
+const amountInputAdd  = document.getElementById('addAmount');
+const submitBtnAdd    = document.querySelector('#sheet button[type="submit"]');
+const warningText     = document.getElementById('balanceWarning');
+
+function checkBalance() {
+    if (!typeSelectAdd || !walletSelectAdd || !amountInputAdd) return;
+
+    const type = typeSelectAdd.value;
+    const amount = parseInt(amountInputAdd.value || 0);
+
+    const selectedWallet = walletSelectAdd.options[walletSelectAdd.selectedIndex];
+    const walletBalance = parseInt(selectedWallet.dataset.balance || 0);
+
+    // hanya validasi untuk pengeluaran
+    if (type === 'expense' && amount > 0 && amount > walletBalance) {
+        warningText.classList.remove('hidden');
+        submitBtnAdd.disabled = true;
+        submitBtnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        warningText.classList.add('hidden');
+        submitBtnAdd.disabled = false;
+        submitBtnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// trigger di event penting
+typeSelectAdd.addEventListener('change', checkBalance);
+walletSelectAdd.addEventListener('change', checkBalance);
+amountInputAdd.addEventListener('input', checkBalance);
 </script>
 {% endblock %}
