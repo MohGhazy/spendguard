@@ -5,6 +5,7 @@ from django.db.models import Sum
 from datetime import datetime, date
 from .models import Transaction, Wallet, Category, Profile
 from django.contrib import messages
+from django.core.paginator import Paginator
 
 @login_required
 def dashboard_view(request):
@@ -97,10 +98,12 @@ def dashboard_view(request):
             'balance': real_balance,
         })
 
-    wallet_breakdown.sort(key=lambda x: x['balance'], reverse=True)
+    # ================= PAGINATION (TRANSAKSI TERBARU) =================
+    tx_recent_qs = tx_all.order_by('-date', '-id')
 
-    # RECENT
-    tx_recent = tx_all.order_by('-date', '-id')[:10]
+    paginator = Paginator(tx_recent_qs, 5)  # 10 transaksi / halaman
+    tx_page_number = request.GET.get('tx_page')
+    tx_page_obj = paginator.get_page(tx_page_number)
 
     # FILTER UI
     months = [
@@ -111,7 +114,7 @@ def dashboard_view(request):
     years = list(range(now.year - 3, now.year + 1)) 
 
     context = {
-        'tx': tx_recent,
+        'tx_page_obj': tx_page_obj,
         'expense_total': monthly_expense,
         'income_total': monthly_income,
         'balance': balance,

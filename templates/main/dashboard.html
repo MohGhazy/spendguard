@@ -79,13 +79,14 @@
         </div>
 
         <div class="space-y-1">
-            {% for w in wallet_breakdown %}
+            {% for w in wallet_page_obj %}
             <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
                 <span>{{ w.name }}</span>
                 <span>Rp.{{ w.balance|floatformat:0|intcomma }}</span>
             </div>
             {% endfor %}
         </div>
+        
         {% else %}
         <div class="text-gray-500">Tidak ada data dompet.</div>
         {% endif %}
@@ -94,22 +95,90 @@
 </div>
 
 <!-- RECENT TRANSACTIONS -->
-<h2 class="font-semibold mb-2 mt-6">Transaksi Terbaru</h2>
-<div class="space-y-2">
-    {% for t in tx %}
-    <div class="p-3 border border-gray-700 rounded flex justify-between">
-        <div>
-            <div class="font-medium">{{ t.category.name }}</div>
-            <div class="text-xs text-gray-400">{{ t.date }}</div>
-        </div>
-        <div class="font-semibold {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-            {% if t.type == 'income' %}+{% else %}-{% endif %}Rp.{{ t.amount|floatformat:0|intcomma }}
-        </div>
+<h2 class="font-semibold mb-3 mt-6">Transaksi Terbaru</h2>
+
+<div class="overflow-hidden rounded-xl border border-gray-700">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-800 text-gray-300">
+                <tr>
+                    <th class="p-3 text-left w-12">No.</th>
+                    <th class="p-3 text-left">Keperluan</th>
+                    <th class="p-3 text-left">Tanggal</th>
+                    <th class="p-3 text-center">Tipe</th>
+                    <th class="p-3 text-right">Jumlah</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-700">
+                {% for t in tx_page_obj %}
+                <tr class="hover:bg-gray-800/60 transition">
+                    <td class="p-3 text-gray-400">
+                        {{ forloop.counter0|add:tx_page_obj.start_index }}
+                    </td>
+
+                    <td class="p-3 font-medium">
+                        {{ t.category.name }}
+                    </td>
+
+                    <td class="p-3 text-gray-400">
+                        {{ t.date|date:"d M Y" }}
+                    </td>
+
+                    <td class="p-3 text-center">
+                        {% if t.type == 'income' %}
+                        <span class="px-2 py-1 text-xs rounded bg-green-900/40 text-green-400">
+                            Pemasukan
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs rounded bg-red-900/40 text-red-400">
+                            Pengeluaran
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="p-3 text-right font-semibold
+                        {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
+                        {% if t.type == 'income' %}+{% else %}-{% endif %}
+                        Rp.{{ t.amount|floatformat:0|intcomma }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-4 text-center text-gray-500">
+                        Tidak ada transaksi bulan ini.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    {% empty %}
-    <div class="text-gray-500">Tidak ada transaksi bulan ini.</div>
-    {% endfor %}
 </div>
+
+
+{% if tx_page_obj.paginator.num_pages > 1 %}
+<div class="flex justify-center gap-2 mt-3 text-sm">
+    
+    {% if tx_page_obj.has_previous %}
+    <a href="?tx_page={{ tx_page_obj.previous_page_number }}"
+       class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+        Sebelumnya
+    </a>
+    {% endif %}
+
+    <span class="px-3 py-1 bg-gray-800 rounded">
+        Halaman {{ tx_page_obj.number }} dari {{ tx_page_obj.paginator.num_pages }}
+    </span>
+
+    {% if tx_page_obj.has_next %}
+    <a href="?tx_page={{ tx_page_obj.next_page_number }}"
+       class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+        Selanjutnya
+    </a>
+    {% endif %}
+
+</div>
+{% endif %}
 
 {{ donut_labels|json_script:"donut-labels" }}
 {{ donut_values|json_script:"donut-values" }}
