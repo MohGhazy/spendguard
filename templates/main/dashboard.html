@@ -6,28 +6,30 @@
 
 {% block content %}
 
-<form method="GET" class="flex gap-3 mb-5">
-    <select name="month" class="p-2 bg-gray-800 rounded">
-        {% for m, label in months %}
-        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-    </select>
+<div class="mt-5">
+    <form method="GET" class="grid grid-cols-1 gap-3 mb-6 max-w-md mx-auto sm:max-w-none sm:flex">
+        <select name="month" class="w-full px-3 py-2 bg-gray-800 rounded-lg text-sm">
+            {% for m, label in months %}
+            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-    <select name="year" class="p-2 bg-gray-800 rounded">
-        {% for y in years %}
-        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
-        {% endfor %}
-    </select>
+        <select name="year" class="w-full px-3 py-2 bg-gray-800 rounded-lg text-sm">
+            {% for y in years %}
+            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
 
-    <button class="px-4 bg-indigo-600 rounded text-white">Terapkan</button>
-</form>
+        <button class="w-full sm:w-auto px-4 py-2 bg-indigo-600 rounded-lg text-sm font-medium text-white">Terapkan</button>
+    </form>
+</div>
 
-<div class="grid grid-cols-2 gap-3 mb-6">
-    <div class="p-4 bg-gray-800 rounded">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
+    <div class="p-4 bg-gray-800 rounded-xl w-full">
         <div class="text-sm text-gray-400">Pemasukan</div>
         <div class="text-green-400 text-xl font-bold">{{ income_total|rupiah }}</div>
     </div>
-    <div class="p-4 bg-gray-800 rounded">
+    <div class="p-4 bg-gray-800 rounded-xl w-full">
         <div class="text-sm text-gray-400">Pengeluaran</div>
         <div class="text-red-400 text-xl font-bold">{{ expense_total|rupiah }}</div>
     </div>
@@ -38,7 +40,7 @@
         Total Saldo
     </div>
 
-    <div class="text-3xl font-bold tracking-wide">
+    <div class="text-2xl sm:text-3xl font-bold tracking-wide">
         {{ balance|rupiah }}
     </div>
 </div>
@@ -51,7 +53,7 @@
         <h2 class="font-semibold mb-3">Rincian Pengeluaran</h2>
 
         {% if donut_values %}
-        <div class="relative w-full h-56 mb-3">
+        <div class="relative w-full h-48 sm:h-56 mb-3">
             <canvas id="expenseDonut"></canvas>
         </div>
 
@@ -74,13 +76,13 @@
         <h2 class="font-semibold mb-3">Rincian Dompet</h2>
 
         {% if wallet_values %}
-        <div class="relative w-full h-56 mb-3">
+        <div class="relative w-full h-48 sm:h-56 mb-3">
             <canvas id="walletDonut"></canvas>
         </div>
 
         <div class="space-y-1">
             {% for w in wallet_page_obj %}
-            <div class="flex justify-between text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
+            <div class="flex justify-between text-xs sm:text-sm {% if forloop.first %} text-indigo-400 font-semibold {% else %} text-gray-300 {% endif %}">
                 <span>{{ w.name }}</span>
                 <span>Rp.{{ w.balance|floatformat:0|intcomma }}</span>
             </div>
@@ -97,64 +99,92 @@
 <!-- RECENT TRANSACTIONS -->
 <h2 class="font-semibold mb-3 mt-6">Transaksi Terbaru</h2>
 
-<div class="overflow-hidden rounded-xl border border-gray-700">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-800 text-gray-300">
-                <tr>
-                    <th class="p-3 text-left w-12">No.</th>
-                    <th class="p-3 text-left">Keperluan</th>
-                    <th class="p-3 text-left">Tanggal</th>
-                    <th class="p-3 text-center">Tipe</th>
-                    <th class="p-3 text-right">Jumlah</th>
-                </tr>
-            </thead>
+<!-- DESKTOP TABLE -->
+<div class="hidden sm:block overflow-x-auto rounded-xl border border-gray-700">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-800 text-gray-300">
+            <tr>
+                <th class="p-3 text-left w-12">No.</th>
+                <th class="p-3 text-left">Keperluan</th>
+                <th class="p-3 text-left">Tanggal</th>
+                <th class="p-3 text-center">Tipe</th>
+                <th class="p-3 text-right">Jumlah</th>
+            </tr>
+        </thead>
 
-            <tbody class="divide-y divide-gray-700">
-                {% for t in tx_page_obj %}
-                <tr class="hover:bg-gray-800/60 transition">
-                    <td class="p-3 text-gray-400">
-                        {{ forloop.counter0|add:tx_page_obj.start_index }}
-                    </td>
-
-                    <td class="p-3 font-medium">
-                        {{ t.category.name }}
-                    </td>
-
-                    <td class="p-3 text-gray-400">
-                        {{ t.date|date:"d F Y" }}
-                    </td>
-
-                    <td class="p-3 text-center">
-                        {% if t.type == 'income' %}
-                        <span class="px-2 py-1 text-xs rounded bg-green-900/40 text-green-400">
-                            Pemasukan
-                        </span>
-                        {% else %}
-                        <span class="px-2 py-1 text-xs rounded bg-red-900/40 text-red-400">
-                            Pengeluaran
-                        </span>
-                        {% endif %}
-                    </td>
-
-                    <td class="p-3 text-right font-semibold
-                        {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-                        {% if t.type == 'income' %}+{% else %}-{% endif %}
-                        Rp.{{ t.amount|floatformat:0|intcomma }}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="p-4 text-center text-gray-500">
-                        Tidak ada transaksi bulan ini.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <tbody class="divide-y divide-gray-700">
+            {% for t in tx_page_obj %}
+            <tr class="hover:bg-gray-800/60 transition">
+                <td class="p-3 text-gray-400">
+                    {{ forloop.counter0|add:tx_page_obj.start_index }}
+                </td>
+                <td class="p-3 font-medium">{{ t.category.name }}</td>
+                <td class="p-3 text-gray-400">
+                    {{ t.date|date:"d F Y" }}
+                </td>
+                <td class="p-3 text-center">
+                    {% if t.type == 'income' %}
+                    <span class="px-2 py-1 text-xs rounded bg-green-900/40 text-green-400">
+                        Pemasukan
+                    </span>
+                    {% else %}
+                    <span class="px-2 py-1 text-xs rounded bg-red-900/40 text-red-400">
+                        Pengeluaran
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="p-3 text-right font-semibold
+                    {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
+                    {% if t.type == 'income' %}+{% else %}-{% endif %}
+                    Rp{{ t.amount|floatformat:0|intcomma }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="p-4 text-center text-gray-500">
+                    Tidak ada transaksi bulan ini.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
+<!-- MOBILE CARDS -->
+<div class="sm:hidden space-y-3">
+    {% for t in tx_page_obj %}
+    <div class="bg-gray-800 rounded-xl p-4">
+        <div class="flex justify-between text-sm">
+            <span class="font-medium">{{ t.category.name }}</span>
+            <span class="text-gray-400">
+                {{ t.date|date:"d M Y" }}
+            </span>
+        </div>
+
+        <div class="flex justify-between items-center mt-2">
+            <span class="text-xs px-2 py-1 rounded
+                {% if t.type == 'income' %}
+                    bg-green-900/40 text-green-400
+                {% else %}
+                    bg-red-900/40 text-red-400
+                {% endif %}
+            ">
+                {{ t.type|title }}
+            </span>
+
+            <span class="font-semibold
+                {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
+                {% if t.type == 'income' %}+{% else %}-{% endif %}
+                Rp{{ t.amount|floatformat:0|intcomma }}
+            </span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center text-gray-500">
+        Tidak ada transaksi bulan ini.
+    </div>
+    {% endfor %}
+</div>
 
 {% if tx_page_obj.paginator.num_pages > 1 %}
 <div class="flex justify-center gap-2 mt-3 text-sm">

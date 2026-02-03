@@ -2,72 +2,101 @@
 <html lang="en" class="dark bg-gray-900 text-gray-100">
 <head>
  <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>{% block title %}SpendGuard{% endblock %}</title>
  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="h-screen flex overflow-hidden bg-gray-950 text-gray-100">
+<body class="h-screen bg-gray-950 text-gray-100 overflow-hidden">
 
-  <!-- Sidebar -->
-  <nav class="w-56 h-screen sticky top-0 border-r border-gray-800 p-5 flex flex-col gap-1">
-    
-    <div class="text-2xl font-bold mb-6 tracking-wide">
+  <!-- Mobile Topbar -->
+  <div class="md:hidden fixed top-0 left-0 right-0 z-50
+            h-14 flex items-center justify-between
+            px-4 border-b border-gray-800 bg-gray-950">
+    <button id="menuBtn" type="button" class="text-gray-200 focus:outline-none active:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <div class="font-bold tracking-wide">
       Spend<span class="text-indigo-400">Guard</span>
     </div>
-    
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg font-semibold">
-        {{ request.user.username|first|upper }}
-      </div>
-      <div class="leading-tight">
-        <div class="font-medium text-gray-100">{{ request.user.username|title }}</div>
-        <div class="text-xs text-gray-400">{{ request.user.email }}</div>
-      </div>
-    </div>
-
-    <a href="/dashboard/"
-       class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
-      Dashboard
-    </a>
-
-    <a href="/transactions/"
-       class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
-      Transaksi
-    </a>
-
-    <a href="/settings/"
-       class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
-      Pengaturan
-    </a>
-
-    <div class="mt-auto pt-4 border-t border-gray-800">
-      <a href="/accounts/logout/"
-         class="px-3 py-2 rounded-md text-red-400 hover:bg-red-500/20 hover:text-red-300 transition">
-        Keluar
-      </a>
-    </div>
-
-  </nav>
-
-  <!-- Content -->
-  <main class="flex-1 p-6 overflow-y-auto">
-    {% block content %}{% endblock %}
-  </main>
-
-  {% block extra_script %}{% endblock %}
-
-  {% if messages %}
-    <div id="snackbar-container" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
-    {% for message in messages %}
-    <div class="snackbar px-4 py-3 rounded-lg text-sm shadow-lg
-        {% if message.tags == 'success' %} bg-green-500 text-white
-        {% elif message.tags == 'error' %} bg-red-500 text-white
-        {% else %} bg-gray-800 text-white
-        {% endif %}">
-      {{ message }}
-    </div>
-    {% endfor %}
   </div>
-  {% endif %}
+
+  <div class="flex h-full">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="fixed md:static top-14 md:top-0 left-0 right-0 z-40
+        w-full md:w-56 md:h-full
+        bg-gray-950 border-b md:border-r border-gray-800
+        p-5 flex flex-col gap-1
+        transform -translate-y-full md:translate-y-0
+        transition-transform duration-300 ease-in-out">
+
+      <div class="hidden md:block text-2xl font-bold mb-6 tracking-wide">
+        Spend<span class="text-indigo-400">Guard</span>
+      </div>
+      
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg font-semibold">
+          {{ request.user.username|first|upper }}
+        </div>
+        <div class="leading-tight">
+          <div class="font-medium text-gray-100">{{ request.user.username|title }}</div>
+          <div class="text-xs text-gray-400">{{ request.user.email }}</div>
+        </div>
+      </div>
+
+      <a href="/dashboard/"
+        class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
+        Dashboard
+      </a>
+
+      <a href="/transactions/"
+        class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
+        Transaksi
+      </a>
+
+      <a href="/settings/"
+        class="nav-item px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
+        Pengaturan
+      </a>
+
+      <div class="mt-auto pt-4 border-t border-gray-800">
+        <a href="/accounts/logout/"
+          class="px-3 py-2 rounded-md text-red-400 hover:bg-red-500/20 hover:text-red-300 transition">
+          Keluar
+        </a>
+      </div>
+
+    </nav>
+
+    <div id="overlay" 
+      class="fixed inset-x-0 top-14 bottom-0 bg-black/60 z-30 hidden md:hidden">
+    </div>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 pt-14 md:pt-6">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_script %}{% endblock %}
+
+    {% if messages %}
+      <div id="snackbar-container" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
+      {% for message in messages %}
+      <div class="snackbar px-4 py-3 rounded-lg text-sm shadow-lg
+          {% if message.tags == 'success' %} bg-green-500 text-white
+          {% elif message.tags == 'error' %} bg-red-500 text-white
+          {% else %} bg-gray-800 text-white
+          {% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
 
   <style>
   .snackbar {
@@ -92,6 +121,17 @@
     0%   { opacity:1; transform: translateY(0); }
     100% { opacity:0; transform: translateY(20px); }
   }
+
+  button,
+  button:focus,
+  button:active {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
   </style>
 
 
@@ -104,6 +144,21 @@
       setTimeout(() => sb.remove(), 350);
     }, 3000);
   }
+
+  // Hamburger Menu
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  menuBtn?.addEventListener('click', () => {
+    sidebar.classList.toggle('-translate-y-full');
+    overlay.classList.toggle('hidden');
+  });
+
+  overlay?.addEventListener('click', () => {
+    sidebar.classList.add('-translate-y-full');
+    overlay.classList.add('hidden');
+  });
   </script>
 
 </body>
