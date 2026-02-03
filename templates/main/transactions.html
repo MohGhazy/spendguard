@@ -63,7 +63,7 @@
                 <tbody class="divide-y divide-gray-700">
                     {% for t in tx_income %}
                     <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3">{{ t.date }}</td>
+                        <td class="p-3">{{ t.date|date:"d F Y" }}</td>
                         <td class="p-3">{{ t.category.name }}</td>
                         <td class="p-3">{{ t.wallet.name }}</td>
                         <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
@@ -92,6 +92,27 @@
             </table>
         </div>
     </div>
+        {% if tx_income.paginator.num_pages > 1 %}
+            <div class="flex justify-center gap-2 mt-4 text-sm">
+                {% if tx_income.has_previous %}
+                <a href="?month={{ selected_month }}&year={{ selected_year }}&income_page={{ tx_income.previous_page_number }}"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                    Sebelumnya
+                </a>
+                {% endif %}
+
+                <span class="px-3 py-1 bg-gray-800 rounded">
+                    {{ tx_income.number }} / {{ tx_income.paginator.num_pages }}
+                </span>
+
+                {% if tx_income.has_next %}
+                <a href="?month={{ selected_month }}&year={{ selected_year }}&income_page={{ tx_income.next_page_number }}"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                    Selanjutnya
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
 </div>
 
 <!-- EXPENSE TABLE -->
@@ -114,7 +135,7 @@
                 <tbody class="divide-y divide-gray-700">
                     {% for t in tx_expense %}
                     <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3">{{ t.date }}</td>
+                        <td class="p-3">{{ t.date|date:"d F Y" }}</td>
                         <td class="p-3">{{ t.category.name }}</td>
                         <td class="p-3">{{ t.wallet.name }}</td>
                         <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
@@ -143,6 +164,27 @@
             </table>
         </div>
     </div>
+        {% if tx_expense.paginator.num_pages > 1 %}
+            <div class="flex justify-center gap-2 mt-4 text-sm">
+                {% if tx_expense.has_previous %}
+                <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.previous_page_number }}"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                    Sebelumnya
+                </a>
+                {% endif %}
+
+                <span class="px-3 py-1 bg-gray-800 rounded">
+                    {{ tx_expense.number }} / {{ tx_expense.paginator.num_pages }}
+                </span>
+
+                {% if tx_expense.has_next %}
+                <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.next_page_number }}"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                    Selanjutnya
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
 </div>
 
 <!-- OVERLAY -->

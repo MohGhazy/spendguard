@@ -217,6 +217,16 @@ def transaction_list(request):
         date__year=year
     ).order_by('-date', '-id')
     
+    # 🔥 PAGINATION (5 data per table)
+    income_paginator = Paginator(tx_income, 5)
+    expense_paginator = Paginator(tx_expense, 5)
+
+    income_page = request.GET.get('income_page')
+    expense_page = request.GET.get('expense_page')
+
+    tx_income = income_paginator.get_page(income_page)
+    tx_expense = expense_paginator.get_page(expense_page)
+    
     wallets = Wallet.objects.filter(user=user)
 
     wallet_balances = {}

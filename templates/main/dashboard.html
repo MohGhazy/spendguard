@@ -122,7 +122,7 @@
                     </td>
 
                     <td class="p-3 text-gray-400">
-                        {{ t.date|date:"d M Y" }}
+                        {{ t.date|date:"d F Y" }}
                     </td>
 
                     <td class="p-3 text-center">
@@ -167,7 +167,7 @@
     {% endif %}
 
     <span class="px-3 py-1 bg-gray-800 rounded">
-        Halaman {{ tx_page_obj.number }} dari {{ tx_page_obj.paginator.num_pages }}
+        {{ tx_page_obj.number }} / {{ tx_page_obj.paginator.num_pages }}
     </span>
 
     {% if tx_page_obj.has_next %}
