@@ -52,7 +52,7 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-800 text-gray-300">
                     <tr>
-                        <th class="p-3 text-left">Tanggal</th>
+                        <th class="p-3 text-center">Tanggal</th>
                         <th class="p-3 text-left">Kategori</th>
                         <th class="p-3 text-left">Wallet</th>
                         <th class="p-3 text-left">Catatan</th>
@@ -63,7 +63,7 @@
                 <tbody class="divide-y divide-gray-700">
                     {% for t in tx_income %}
                     <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3">{{ t.date|date:"d F Y" }}</td>
+                        <td class="p-3 text-center">{{ t.date|date:"d F Y" }}</td>
                         <td class="p-3">{{ t.category.name }}</td>
                         <td class="p-3">{{ t.wallet.name }}</td>
                         <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
@@ -124,7 +124,7 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-800 text-gray-300">
                     <tr>
-                        <th class="p-3 text-left">Tanggal</th>
+                        <th class="p-3 text-center">Tanggal</th>
                         <th class="p-3 text-left">Kategori</th>
                         <th class="p-3 text-left">Wallet</th>
                         <th class="p-3 text-left">Catatan</th>
@@ -135,7 +135,7 @@
                 <tbody class="divide-y divide-gray-700">
                     {% for t in tx_expense %}
                     <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3">{{ t.date|date:"d F Y" }}</td>
+                        <td class="p-3 text-center">{{ t.date|date:"d F Y" }}</td>
                         <td class="p-3">{{ t.category.name }}</td>
                         <td class="p-3">{{ t.wallet.name }}</td>
                         <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
