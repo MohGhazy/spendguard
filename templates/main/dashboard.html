@@ -6,23 +6,29 @@
 
 {% block content %}
 
+<style>
+    @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up{
+    animation: fadeUp .35s ease-out;
+  }
+</style>
+
 <div class="max-w-5xl mx-auto px-3 sm:px-4 lg:px-0">
-    <div class="mt-2 sm:mt-5">
+    <div class="mt-0 animate-fade-up">
         <form method="GET" class="flex items-center gap-2 mb-6 justify-start">
             <div class="relative w-[120px]">
                 <select name="month"
-                    class="appearance-none w-full
-                        bg-gray-800/80 backdrop-blur
-                        border border-gray-700
-                        text-gray-200
-                        px-3 sm:px-4
-                        py-2 sm:py-2.5
-                        pr-8 sm:pr-10
-                        rounded-lg sm:rounded-xl
-                        text-xs sm:text-sm
-                        focus:outline-none
-                        focus:ring-2 focus:ring-indigo-500
-                        transition cursor-pointer">
+                    class="appearance-none w-full bg-gray-800/80 backdrop-blur border border-gray-700 text-gray-200 px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer">
 
                     {% for m, label in months %}
                     <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
@@ -39,17 +45,7 @@
 
             <div class="relative w-[95px]">
                 <select name="year"
-                    class="appearance-none w-full
-                        bg-gray-800/80 backdrop-blur
-                        border border-gray-700
-                        text-gray-200
-                        px-4 py-2.5 pr-10
-                        rounded-xl
-                        text-xs sm:text-sm
-                        focus:outline-none
-                        focus:ring-2 focus:ring-indigo-500
-                        focus:border-indigo-500
-                        transition cursor-pointer">
+                    class="appearance-none w-full bg-gray-800/80 backdrop-blur border border-gray-700 text-gray-200 px-4 py-2.5 pr-10 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition cursor-pointer">
 
                     {% for y in years %}
                     <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
@@ -63,22 +59,22 @@
                 </div>
             </div>
 
-            <button class="sm:w-auto px-4 py-2 bg-indigo-600 rounded-lg text-xs sm:text-sm font-medium text-white">Terapkan</button>
+            <button class="sm:w-auto px-4 py-2 bg-indigo-600 rounded-lg text-xs sm:text-sm font-medium text-white transition-all duration-200 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95">Terapkan</button>
         </form>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <div class="p-2.5 sm:p-4 bg-gray-800 rounded-lg sm:rounded-xl w-full">
+        <div class="p-2.5 sm:p-4 bg-gray-800 rounded-lg sm:rounded-xl w-full transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 animate-fade-up">
             <div class="text-[11px] sm:text-sm text-gray-400">Pemasukan</div>
             <div class="text-green-400 text-sm sm:text-lg lg:text-xl font-bold">{{ income_total|rupiah }}</div>
         </div>
-        <div class="p-2.5 sm:p-4 bg-gray-800 rounded-lg sm:rounded-xl w-full">
+        <div class="p-2.5 sm:p-4 bg-gray-800 rounded-lg sm:rounded-xl w-full transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 animate-fade-up">
             <div class="text-[11px] sm:text-sm text-gray-400">Pengeluaran</div>
             <div class="text-red-400 text-sm sm:text-lg lg:text-xl font-bold">{{ expense_total|rupiah }}</div>
         </div>
     </div>
 
-    <div class="mb-6 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-indigo-600 text-white shadow-md sm:shadow-xl">
+    <div class="mb-6 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-indigo-600 ring-1 ring-white/10 text-white shadow-md sm:shadow-xl transition-all duration-200 hover:shadow-indigo-500/40 hover:-translate-y-1 animate-fade-up [animation-delay:.1s]">
         <div class="text-sm sm:text-lg opacity-80">
             Total Saldo
         </div>
@@ -89,28 +85,14 @@
     </div>
 
     <!-- CHARTS GROUP (GRID) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2
-    gap-4 sm:gap-6
-    max-w-xl md:max-w-2xl lg:max-w-none
-    mx-auto
-    mt-4 sm:mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 max-w-xl md:max-w-2xl lg:max-w-none mx-auto mt-4 sm:mt-6">
 
         <!-- EXPENSE BLOCK -->
-        <div class="bg-gray-800 
-            p-2 sm:p-4
-            rounded-lg sm:rounded-xl
-            max-w-[320px] sm:max-w-none
-            mx-auto">
-            <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3">Rincian Pengeluaran</h2>
+        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 animate-fade-up">
+            <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-center">Rincian Pengeluaran</h2>
 
             {% if donut_values %}
-            <div class="relative 
-            w-full 
-            max-w-[200px] 
-            sm:max-w-[260px]
-            lg:max-w-[320px]
-            h-28 sm:h-40 lg:h-56 
-            mx-auto mb-3">
+            <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
                 <canvas id="expenseDonut"></canvas>
             </div>
 
@@ -129,17 +111,11 @@
         </div>
 
         <!-- WALLET BLOCK -->
-        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto">
-            <h2 class="font-semibold mb-3">Rincian Dompet</h2>
+        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl animate-fade-up">
+            <h2 class="font-semibold mb-3 text-center">Rincian Dompet</h2>
 
             {% if wallet_values %}
-            <div class="relative 
-            w-full 
-            max-w-[200px] 
-            sm:max-w-[260px]
-            lg:max-w-[320px]
-            h-28 sm:h-40 lg:h-56 
-            mx-auto mb-3">
+            <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
                 <canvas id="walletDonut"></canvas>
             </div>
 
@@ -163,43 +139,41 @@
     <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 mt-4 sm:mt-6">Transaksi Terbaru</h2>
 
     <!-- DESKTOP TABLE -->
-    <div class="hidden sm:block overflow-x-auto rounded-xl border border-gray-700">
-        <table class="w-full text-xs sm:text-sm">
+    <div class="overflow-x-auto rounded-xl border border-gray-700 animate-fade-up will-change-transform">
+        <table class="w-full whitespace-nowrap text-[10px] sm:text-xs lg:text-sm">
             <thead class="bg-gray-800 text-gray-300">
                 <tr>
-                    <th class="p-3 text-center w-12">No.</th>
-                    <th class="p-3 text-center">Keperluan</th>
-                    <th class="p-3 text-center">Tanggal</th>
-                    <th class="p-3 text-center">Tipe</th>
-                    <th class="p-3 text-right">Jumlah</th>
+                    <th class="p-1.5 sm:p-2 lg:p-3 text-center w-8">No.</th>
+                    <th class="p-1.5 sm:p-2 lg:p-3 text-left w-32">Keperluan</th>
+                    <th class="p-1.5 sm:p-2 lg:p-3 text-center w-20">Tanggal</th>
+                    <th class="p-1.5 sm:p-2 lg:p-3 text-center w-16">Tipe</th>
+                    <th class="p-1.5 sm:p-2 lg:p-3 text-right w-24">Jumlah</th>
                 </tr>
             </thead>
 
             <tbody class="divide-y divide-gray-700">
                 {% for t in tx_page_obj %}
-                <tr class="hover:bg-gray-800/60 transition">
-                    <td class="p-3 text-center text-gray-400">
+                <tr class="hover:bg-gray-800/60 transition-all duration-150 hover:bg-gray-800/80">
+                    <td class="p-1.5 sm:p-2 lg:p-3 text-center text-gray-400">
                         {{ forloop.counter0|add:tx_page_obj.start_index }}
                     </td>
-                    <td class="p-3 text-center font-medium">{{ t.category.name }}</td>
-                    <td class="p-3 text-center text-gray-400">
+                    <td class="p-1.5 sm:p-2 lg:p-3 text-left font-medium">{{ t.category.name }}</td>
+                    <td class="p-1.5 sm:p-2 lg:p-3 text-center text-gray-400">
                         {{ t.date|date:"d F Y" }}
                     </td>
-                    <td class="p-3 text-center">
+                    <td class="p-1.5 sm:p-2 lg:p-3 text-center">
                         {% if t.type == 'income' %}
-                        <span class="px-2 py-1 text-xs rounded bg-green-900/40 text-green-400">
+                        <span class="px-1.5 py-0.5 text-[9px] sm:text-xs rounded bg-green-900/40 text-green-400">
                             Pemasukan
                         </span>
                         {% else %}
-                        <span class="px-2 py-1 text-xs rounded bg-red-900/40 text-red-400">
+                        <span class="px-1.5 py-0.5 text-[9px] sm:text-xs rounded bg-red-900/40 text-red-400">
                             Pengeluaran
                         </span>
                         {% endif %}
                     </td>
-                    <td class="p-3 text-right font-semibold
-                        {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-                        {% if t.type == 'income' %}+{% else %}-{% endif %}
-                        Rp{{ t.amount|floatformat:0|intcomma }}
+                    <td class="tabular-nums p-1.5 sm:p-2 lg:p-3 text-right font-semibold">
+                        Rp.{{ t.amount|floatformat:0|intcomma }}
                     </td>
                 </tr>
                 {% empty %}
@@ -211,42 +185,6 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-
-    <!-- MOBILE CARDS -->
-    <div class="sm:hidden space-y-2 sm:space-y-3">
-        {% for t in tx_page_obj %}
-        <div class="bg-gray-800 rounded-lg p-3">
-            <div class="flex justify-between text-xs sm:text-sm">
-                <span class="font-medium">{{ t.category.name }}</span>
-                <span class="text-gray-400">
-                    {{ t.date|date:"d M Y" }}
-                </span>
-            </div>
-
-            <div class="flex justify-between items-center mt-2">
-                <span class="text-xs px-2 py-1 rounded
-                    {% if t.type == 'income' %}
-                        bg-green-900/40 text-green-400
-                    {% else %}
-                        bg-red-900/40 text-red-400
-                    {% endif %}
-                ">
-                    {{ t.type|title }}
-                </span>
-
-                <span class="font-semibold text-sm sm:text-base
-                    {% if t.type == 'income' %}text-green-400{% else %}text-red-400{% endif %}">
-                    {% if t.type == 'income' %}+{% else %}-{% endif %}
-                    Rp{{ t.amount|floatformat:0|intcomma }}
-                </span>
-            </div>
-        </div>
-        {% empty %}
-        <div class="text-center text-gray-500">
-            Tidak ada transaksi bulan ini.
-        </div>
-        {% endfor %}
     </div>
 
     {% if tx_page_obj.paginator.num_pages > 1 %}
@@ -316,7 +254,22 @@ new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+        legend: {
+            labels: {
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 9,
+                boxHeight: 9,
+                padding: 12,
+
+                font: {
+                    size: 13
+                }
+            }
+        }
     }
+}
 });
 
 new Chart(ctx2, {
@@ -331,7 +284,22 @@ new Chart(ctx2, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+        legend: {
+            labels: {
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 9,
+                boxHeight: 9,
+                padding: 12,
+
+                font: {
+                    size: 13
+                }
+            }
+        }
     }
+}
 });
 </script>
 
