@@ -23,7 +23,7 @@
   }
 </style>
 
-<div class="max-w-5xl mx-auto px-3 sm:px-4 lg:px-0">
+<div class="max-w-full md:max-w-3xl lg:max-w-5xl mx-auto px-3 sm:px-4 lg:px-0">
     <div class="mt-0 animate-fade-up">
         <form method="GET" class="flex items-center gap-2 mb-6 justify-start">
             <div class="relative w-[120px]">
@@ -89,7 +89,7 @@
 
         <!-- EXPENSE BLOCK -->
         <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 animate-fade-up">
-            <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 text-center">Rincian Pengeluaran</h2>
+            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm mb-2 sm:mb-3 text-center">Rincian Pengeluaran</h2>
 
             {% if donut_values %}
             <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
@@ -112,7 +112,7 @@
 
         <!-- WALLET BLOCK -->
         <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl animate-fade-up">
-            <h2 class="font-semibold mb-3 text-center">Rincian Dompet</h2>
+            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm mb-2 sm:mb-3 text-center">Rincian Dompet</h2>
 
             {% if wallet_values %}
             <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
@@ -139,8 +139,8 @@
     <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 mt-4 sm:mt-6">Transaksi Terbaru</h2>
 
     <!-- DESKTOP TABLE -->
-    <div class="overflow-x-auto rounded-xl border border-gray-700 animate-fade-up will-change-transform">
-        <table class="w-full whitespace-nowrap text-[10px] sm:text-xs lg:text-sm">
+    <div class="hidden sm:block overflow-x-auto rounded-xl border border-gray-700 animate-fade-up will-change-transform">
+        <table class="w-full text-[10px] sm:text-xs lg:text-sm">
             <thead class="bg-gray-800 text-gray-300">
                 <tr>
                     <th class="p-1.5 sm:p-2 lg:p-3 text-center w-8">No.</th>
@@ -158,7 +158,7 @@
                         {{ forloop.counter0|add:tx_page_obj.start_index }}
                     </td>
                     <td class="p-1.5 sm:p-2 lg:p-3 text-left font-medium">{{ t.category.name }}</td>
-                    <td class="p-1.5 sm:p-2 lg:p-3 text-center text-gray-400">
+                    <td class="whitespace-nowrap p-1.5 sm:p-2 lg:p-3 text-center text-gray-400">
                         {{ t.date|date:"d F Y" }}
                     </td>
                     <td class="p-1.5 sm:p-2 lg:p-3 text-center">
@@ -172,7 +172,7 @@
                         </span>
                         {% endif %}
                     </td>
-                    <td class="tabular-nums p-1.5 sm:p-2 lg:p-3 text-right font-semibold">
+                    <td class="tabular-nums whitespace-nowrap p-1.5 sm:p-2 lg:p-3 text-right font-semibold">
                         Rp.{{ t.amount|floatformat:0|intcomma }}
                     </td>
                 </tr>
@@ -187,23 +187,89 @@
         </table>
     </div>
 
+    <!-- MOBILE FINTECH -->
+    <div class="sm:hidden space-y-3 animate-fade-up">
+
+    {% for t in tx_page_obj %}
+    <div class="bg-gray-800/90 backdrop-blur
+                rounded-2xl
+                p-3
+                shadow-lg shadow-black/20
+                active:scale-[0.98]
+                transition-all">
+
+        <!-- TOP -->
+        <div class="flex justify-between items-start">
+
+            <div>
+                <p class="text-sm font-semibold">
+                    {{ t.category.name }}
+                </p>
+
+                <p class="text-[11px] text-gray-400">
+                    {{ t.date|date:"d M Y" }}
+                </p>
+            </div>
+
+            <!-- AMOUNT -->
+            <div class="text-right">
+
+                <p class="font-bold text-sm
+                    {% if t.type == 'income' %}
+                        text-green-400
+                    {% else %}
+                        text-red-400
+                    {% endif %}
+                ">
+                    {% if t.type == 'income' %}+{% else %}-{% endif %}
+                    Rp{{ t.amount|floatformat:0|intcomma }}
+                </p>
+
+                <span class="text-[10px]
+                    px-2 py-[2px]
+                    rounded-full
+                    {% if t.type == 'income' %}
+                        bg-green-500/15 text-green-400
+                    {% else %}
+                        bg-red-500/15 text-red-400
+                    {% endif %}
+                ">
+                    {{ t.type|title }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+    </div>
+
+
     {% if tx_page_obj.paginator.num_pages > 1 %}
-    <div class="flex justify-center gap-2 mt-3 text-sm">
+    <div class="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-3 text-[11px] sm:text-sm">
         
         {% if tx_page_obj.has_previous %}
         <a href="?tx_page={{ tx_page_obj.previous_page_number }}"
-        class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+        class="px-2 py-1 sm:px-3 sm:py-1.5 bg-gray-700/70 hover:bg-indigo-600 hover:text-white rounded-md sm:rounded-lg transition-all duration-200 hover:-translate-y-0.5">
             Sebelumnya
         </a>
         {% endif %}
 
-        <span class="px-3 py-1 bg-gray-800 rounded">
+        <span class="px-2 py-1 sm:px-3 sm:py-1.5
+                    bg-gray-800
+                    rounded-md sm:rounded-lg
+                    tabular-nums">
             {{ tx_page_obj.number }} / {{ tx_page_obj.paginator.num_pages }}
         </span>
 
         {% if tx_page_obj.has_next %}
         <a href="?tx_page={{ tx_page_obj.next_page_number }}"
-        class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+        class="px-2 py-1 sm:px-3 sm:py-1.5
+                bg-gray-700 rounded-md sm:rounded-lg
+                hover:bg-gray-600
+                transition-all duration-150 active:scale-95">
             Selanjutnya
         </a>
         {% endif %}
@@ -242,65 +308,91 @@ const walletValues = JSON.parse(
 const ctx = document.getElementById('expenseDonut');
 var ctx2 = document.getElementById('walletDonut').getContext('2d');
 
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: donutLabels,
-        datasets: [{
-            data: donutValues,
-            backgroundColor: ['#ec4899','#3b82f6','#10b981','#f59e0b','#e11d48','#6366f1','#84cc16','#14b8a6'],
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-        legend: {
-            labels: {
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 9,
-                boxHeight: 9,
-                padding: 12,
+let expenseChart;
+let walletChart;
 
-                font: {
-                    size: 13
+function renderCharts(){
+
+    const w = window.innerWidth;
+
+    const isMobile = w < 640;
+    const isTablet = w >= 640 && w < 1024;
+
+    if(expenseChart) expenseChart.destroy();
+    if(walletChart) walletChart.destroy();
+
+    expenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: donutLabels,
+            datasets: [{
+                data: donutValues,
+                backgroundColor: ['#ec4899','#3b82f6','#10b981','#f59e0b','#e11d48','#6366f1','#84cc16','#14b8a6'],
+            }]
+        },
+        options: {
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{
+                    position:isMobile?'bottom':'top',
+                    labels:{
+                        usePointStyle:true,
+                        pointStyle:'circle',
+                        
+                        boxWidth: isMobile ? 6 : 9,
+                        boxHeight: isMobile ? 6 : 9,
+
+                        padding: isMobile ? 6 : 9,
+
+                        font:{ 
+                            size: isMobile ? 9 : 11,
+                            weight:'500'
+                        }
+                    }
                 }
             }
         }
-    }
-}
-});
+    });
 
-new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-        labels: walletLabels,
-        datasets: [{
-            data: walletValues,
-            backgroundColor: ['#10b981','#6366f1','#f59e0b','#ef4444','#3b82f6','#14b8a6','#e11d48','#84cc16'],
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-        legend: {
-            labels: {
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: 9,
-                boxHeight: 9,
-                padding: 12,
+    walletChart = new Chart(ctx2,{
+        type:'doughnut',
+        data:{
+            labels:walletLabels,
+            datasets:[{
+                data:walletValues,
+                backgroundColor:['#10b981','#6366f1','#f59e0b','#ef4444','#3b82f6','#14b8a6','#e11d48','#84cc16'],
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{
+                    position:isMobile?'bottom':'top',
+                    labels:{
+                        usePointStyle:true,
+                        pointStyle:'circle',
+                        
+                        boxWidth: isMobile ? 6 : 9,
+                        boxHeight: isMobile ? 6 : 9,
 
-                font: {
-                    size: 13
+                        padding: isMobile ? 6 : 9,
+
+                        font:{ 
+                            size: isMobile ? 9 : 11,
+                            weight:'500'
+                        }
+                    }
                 }
             }
         }
-    }
+    });
 }
-});
+
+renderCharts();
+
+window.addEventListener("resize", renderCharts);
 </script>
 
 <script>
