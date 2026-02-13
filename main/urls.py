@@ -9,6 +9,7 @@ urlpatterns = [
  path('onboarding/expense/', onboard_expense, name='onboard_expense'),
  path('transactions/', views.transaction_list, name='transactions'),
  path('transactions/add/', views.transaction_add, name='transaction_add'),
+ path("transactions/<int:pk>/json/", views.transaction_json, name="transaction_json"),
  path('transactions/<int:tx_id>/edit/', views.transaction_edit, name='transaction_edit'),
  path('transactions/<int:tx_id>/delete/', views.transaction_delete, name='transaction_delete'),
  

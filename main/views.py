@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -193,6 +194,23 @@ def onboard_expense(request):
     return render(request, 'main/onboard_expense.html', {'defaults': expense_defaults})
 
 @login_required
+def transaction_json(request, pk):
+
+    tx = Transaction.objects.get(pk=pk, user=request.user)
+
+    data = {
+        "id": tx.id,
+        "amount": tx.amount,
+        "type": tx.type,
+        "wallet": tx.wallet.id,
+        "category": tx.category.id,
+        "date": tx.date.strftime("%Y-%m-%d"),
+        "note": tx.note,
+    }
+
+    return JsonResponse(data)
+
+@login_required
 def transaction_list(request):
     user = request.user
     now = datetime.now()
@@ -274,7 +292,7 @@ def transaction_add(request):
         category = Category.objects.get(id=request.POST['category'])
         amount = request.POST['amount']
         tx_type = request.POST['type']
-        date = request.POST['date']
+        date = request.POST.get('date')
         note = request.POST.get('note', '')
 
         Transaction.objects.create(
@@ -287,12 +305,14 @@ def transaction_add(request):
         note=note,
         )
 
+        messages.success(request, "Transaksi berhasil ditambahkan")
         return redirect('transactions')
 
     context = {
     'wallets': Wallet.objects.filter(user=request.user),
     'categories': Category.objects.filter(user=request.user),
     }
+    
     return render(request, 'main/transaction_add.html', context)
 
 @login_required

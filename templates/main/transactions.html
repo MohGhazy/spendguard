@@ -6,6 +6,177 @@
 
 {% block content %}
 
+<style>
+:root{
+    --sheet:#0b1220;
+    --field:#111827;
+    --border:rgba(148,163,184,.15);
+    --accent:#6366f1;
+}
+
+/* ================= SHEET ================= */
+
+.fintech-sheet{
+    background:rgba(11,18,32,.85);
+    backdrop-filter: blur(20px);
+}
+
+/* ================= FIELD ================= */
+
+.fintech-field{
+    height:44px;
+    padding:0 14px;
+    border-radius:12px;
+    background:var(--field);
+    border:1px solid var(--border);
+    color:#e5e7eb;
+    width:100%;
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .12s ease;
+}
+
+.fintech-field:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(99,102,241,.25);
+    transform:translateY(-1px);
+}
+
+/* BIG AMOUNT */
+
+.fintech-amount{
+    height:56px;
+    font-size:22px;
+    font-weight:600;
+}
+
+/* BUTTON */
+
+.fintech-btn{
+    height:48px;
+    border-radius:14px;
+    font-weight:600;
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+}
+
+/* ================= TOMSELECT ================= */
+
+/* wrapper */
+.ts-wrapper{
+    border:none !important;
+    background:transparent !important;
+    box-shadow:none !important;
+}
+
+/* control */
+.ts-control{
+    display:flex !important;
+    align-items:center !important;
+    height:44px !important;
+    min-height:44px !important;
+    padding:0 14px !important;
+
+    background:var(--field) !important;
+    border:1px solid var(--border) !important;
+    border-radius:12px !important;
+
+    color:#f1f5f9 !important;
+    box-shadow:none !important;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .12s ease;
+}
+
+/* focus animation */
+.ts-wrapper.focus .ts-control,
+.ts-control.focus{
+    border-color:var(--accent) !important;
+    box-shadow:0 0 0 3px rgba(99,102,241,.25) !important;
+    transform:translateY(-1px);
+}
+
+/* text */
+.ts-control .item,
+.ts-control input{
+    font-size:14px !important;
+}
+
+/* placeholder */
+.ts-control .item[data-value=""]{
+    color:#64748b !important;
+    font-weight:500 !important;
+}
+
+/* remove caret */
+.ts-control input{
+    caret-color:transparent !important;
+    color:transparent !important;
+}
+
+/* dropdown */
+.ts-dropdown{
+    background:#020617 !important;
+    border:1px solid var(--border) !important;
+    border-radius:12px !important;
+}
+
+/* options */
+.ts-dropdown .option{
+    background:transparent !important;
+    color:#e2e8f0 !important;
+}
+
+.ts-dropdown .option:hover{
+    background:#1e293b !important;
+    color:white !important;
+}
+
+.ts-dropdown .active,
+.ts-dropdown .highlight{
+    background:#6366f1 !important;
+    color:white !important;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* MOBILE */
+@media(max-width:640px){
+    .sheet-responsive{
+        left:0;
+        right:0;
+        bottom:0;
+        width:100%;
+        border-radius:20px 20px 0 0;
+    }
+}
+
+/* TABLET */
+@media(min-width:641px) and (max-width:1024px){
+    .sheet-responsive{
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        width:520px;
+        border-radius:24px;
+    }
+}
+
+/* DESKTOP */
+@media(min-width:1025px){
+    .sheet-responsive{
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        width:560px;
+        border-radius:28px;
+    }
+}
+</style>
+
 <!-- HEADER -->
 <div class="mb-6">
     <h1 class="text-2xl font-bold tracking-wide">Halaman Transaksi</h1>
@@ -16,7 +187,7 @@
 
 <!-- ADD BUTTON -->
 <button id="addBtn"
-    class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white text-3xl shadow-lg flex items-center justify-center shadow-xl">
+    class="fixed z-[110] bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white text-3xl shadow-lg flex items-center justify-center">
     +
 </button>
 
@@ -43,60 +214,138 @@
     </button>
 </form>
 
-<!-- INCOME TABLE -->
-<div class="mb-10">
-    <h2 class="text-lg font-semibold mb-3 text-green-400">Pemasukan</h2>
+<div class="max-w-6xl mx-auto px-4">
+    <!-- ================= INCOME ================= -->
+    <div class="mb-10">
 
-    <div class="overflow-hidden rounded-xl border border-gray-700">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-800 text-gray-300">
-                    <tr>
-                        <th class="p-3 text-center">Tanggal</th>
-                        <th class="p-3 text-left">Kategori</th>
-                        <th class="p-3 text-left">Wallet</th>
-                        <th class="p-3 text-left">Catatan</th>
-                        <th class="p-3 text-right">Jumlah</th>
-                        <th class="p-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    {% for t in tx_income %}
-                    <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3 text-center">{{ t.date|date:"d F Y" }}</td>
-                        <td class="p-3">{{ t.category.name }}</td>
-                        <td class="p-3">{{ t.wallet.name }}</td>
-                        <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
-                        <td class="p-3 text-green-400 text-right font-semibold">
-                            {{ t.amount|rupiah }}
-                        </td>
-                        <td class="p-3 text-center">
-                            <a href="{% url 'transaction_delete' t.id %}"
-                               class="text-red-400 hover:text-red-300">
-                               Hapus
-                            </a>
-                            <a href="{% url 'transaction_edit' t.id %}"
-                               class="text-blue-400 hover:text-blue-300 ml-2">
-                               Edit
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-gray-500">
-                            Tidak ada pemasukan.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <h2 class="text-lg font-semibold mb-3 text-green-400">
+            Pemasukan
+        </h2>
+
+
+        <!-- ✅ MOBILE CARD -->
+        <div class="space-y-3 md:hidden">
+
+            {% for t in tx_income %}
+            <div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4">
+
+                <!-- top row -->
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-gray-400">
+                        {{ t.date|date:"d M Y" }}
+                    </span>
+
+                    <span class="text-green-400 font-semibold">
+                        {{ t.amount|rupiah }}
+                    </span>
+                </div>
+
+                <!-- category -->
+                <div class="font-semibold">
+                    {{ t.category.name }}
+                </div>
+
+                <!-- wallet -->
+                <div class="text-sm text-gray-400">
+                    {{ t.wallet.name }}
+                </div>
+
+                <!-- note -->
+                {% if t.note %}
+                <div class="text-sm mt-2 text-gray-300">
+                    {{ t.note }}
+                </div>
+                {% endif %}
+
+                <!-- actions -->
+                <div class="flex gap-4 mt-3 text-sm font-medium">
+                    <button class="editBtn text-blue-400 hover:text-blue-300" data-id="{{ t.id }}">
+                        Edit
+                    </button>
+
+                    <a href="{% url 'transaction_delete' t.id %}"
+                    class="text-red-400">
+                        Hapus
+                    </a>
+                </div>
+
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center">
+                Tidak ada pemasukan.
+            </p>
+            {% endfor %}
+
         </div>
-    </div>
+
+
+        <!-- ✅ TABLET + DESKTOP -->
+        <div class="hidden md:block overflow-hidden rounded-xl border border-gray-700">
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full table-fixed text-sm">
+
+                    <thead class="bg-gray-800 text-gray-300">
+                        <tr>
+                            <th class="w-[140px] p-3 text-center">Tanggal</th>
+                            <th class="w-[160px] p-3 text-left">Kategori</th>
+                            <th class="w-[140px] p-3 text-left">Wallet</th>
+                            <th class="p-3 text-left">Catatan</th>
+                            <th class="w-[150px] p-3 text-right">Jumlah</th>
+                            <th class="w-[120px] p-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-700">
+
+                        {% for t in tx_income %}
+                        <tr class="hover:bg-gray-800/60 transition duration-200">
+
+                            <td class="p-3 text-center">
+                                {{ t.date|date:"d M Y" }}
+                            </td>
+
+                            <td class="p-3">
+                                {{ t.category.name }}
+                            </td>
+
+                            <td class="p-3">
+                                {{ t.wallet.name }}
+                            </td>
+
+                            <td class="p-3 text-gray-400">
+                                {{ t.note|default:"-" }}
+                            </td>
+
+                            <td class="p-3 text-green-400 text-right font-semibold">
+                                {{ t.amount|rupiah }}
+                            </td>
+
+                            <td class="p-3 text-center">
+                                <button class="editBtn text-blue-400 hover:text-blue-300" data-id="{{ t.id }}">
+                                    Edit
+                                </button>
+
+                                <a href="{% url 'transaction_delete' t.id %}"
+                                class="text-red-400 hover:text-red-300 ml-2">
+                                Hapus
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% if tx_income.paginator.num_pages > 1 %}
-            <div class="flex justify-center gap-2 mt-4 text-sm">
+            <div class="flex justify-center items-center gap-2 mt-4 text-sm">
+
                 {% if tx_income.has_previous %}
                 <a href="?month={{ selected_month }}&year={{ selected_year }}&income_page={{ tx_income.previous_page_number }}"
-                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition">
                     Sebelumnya
                 </a>
                 {% endif %}
@@ -107,124 +356,223 @@
 
                 {% if tx_income.has_next %}
                 <a href="?month={{ selected_month }}&year={{ selected_year }}&income_page={{ tx_income.next_page_number }}"
-                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition">
                     Selanjutnya
                 </a>
                 {% endif %}
+
             </div>
-        {% endif %}
-</div>
-
-<!-- EXPENSE TABLE -->
-<div>
-    <h2 class="text-lg font-semibold mb-3 text-red-400">Pengeluaran</h2>
-
-    <div class="overflow-hidden rounded-xl border border-gray-700">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-800 text-gray-300">
-                    <tr>
-                        <th class="p-3 text-center">Tanggal</th>
-                        <th class="p-3 text-left">Kategori</th>
-                        <th class="p-3 text-left">Wallet</th>
-                        <th class="p-3 text-left">Catatan</th>
-                        <th class="p-3 text-right">Jumlah</th>
-                        <th class="p-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    {% for t in tx_expense %}
-                    <tr class="hover:bg-gray-800/60 transition">
-                        <td class="p-3 text-center">{{ t.date|date:"d F Y" }}</td>
-                        <td class="p-3">{{ t.category.name }}</td>
-                        <td class="p-3">{{ t.wallet.name }}</td>
-                        <td class="p-3 text-gray-400">{{ t.note|default:"-" }}</td>
-                        <td class="p-3 text-red-400 text-right font-semibold">
-                            {{ t.amount|rupiah }}
-                        </td>
-                        <td class="p-3 text-center">
-                            <a href="{% url 'transaction_delete' t.id %}"
-                               class="text-red-400 hover:text-red-300">
-                               Hapus
-                            </a>
-                            <a href="{% url 'transaction_edit' t.id %}"
-                               class="text-blue-400 hover:text-blue-300 ml-2">
-                               Edit
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-gray-500">
-                            Tidak ada pengeluaran.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% endif %}
     </div>
-        {% if tx_expense.paginator.num_pages > 1 %}
-            <div class="flex justify-center gap-2 mt-4 text-sm">
-                {% if tx_expense.has_previous %}
-                <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.previous_page_number }}"
-                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
-                    Sebelumnya
-                </a>
+
+    <!-- ================= EXPENSE ================= -->
+    <div>
+
+        <h2 class="text-lg font-semibold mb-3 text-red-400">
+            Pengeluaran
+        </h2>
+
+
+        <!-- ✅ MOBILE -->
+        <div class="space-y-3 md:hidden">
+
+            {% for t in tx_expense %}
+            <div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4">
+
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-gray-400">
+                        {{ t.date|date:"d M Y" }}
+                    </span>
+
+                    <span class="text-red-400 font-semibold">
+                        {{ t.amount|rupiah }}
+                    </span>
+                </div>
+
+                <div class="font-semibold">
+                    {{ t.category.name }}
+                </div>
+
+                <div class="text-sm text-gray-400">
+                    {{ t.wallet.name }}
+                </div>
+
+                {% if t.note %}
+                <div class="text-sm mt-2 text-gray-300">
+                    {{ t.note }}
+                </div>
                 {% endif %}
 
-                <span class="px-3 py-1 bg-gray-800 rounded">
-                    {{ tx_expense.number }} / {{ tx_expense.paginator.num_pages }}
-                </span>
+                <div class="flex gap-4 mt-3 text-sm font-medium">
+                    <button class="editBtn text-blue-400 hover:text-blue-300"
+                            data-id="{{ t.id }}">
+                        Edit
+                    </button>
 
-                {% if tx_expense.has_next %}
-                <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.next_page_number }}"
-                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">
-                    Selanjutnya
-                </a>
-                {% endif %}
+                    <a href="{% url 'transaction_delete' t.id %}"
+                    class="text-red-400">
+                        Hapus
+                    </a>
+                </div>
+
             </div>
+            {% empty %}
+            <p class="text-gray-500 text-center">
+                Tidak ada pengeluaran.
+            </p>
+            {% endfor %}
+
+        </div>
+
+
+        <!-- ✅ TABLET + DESKTOP -->
+        <div class="hidden md:block overflow-hidden rounded-xl border border-gray-700">
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full table-fixed text-sm">
+
+                    <thead class="bg-gray-800 text-gray-300">
+                        <tr>
+                            <th class="w-[140px] p-3 text-center">Tanggal</th>
+                            <th class="w-[160px] p-3 text-left">Kategori</th>
+                            <th class="w-[140px] p-3 text-left">Wallet</th>
+                            <th class="p-3 text-left">Catatan</th>
+                            <th class="w-[150px] p-3 text-right">Jumlah</th>
+                            <th class="w-[120px] p-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-700">
+
+                        {% for t in tx_expense %}
+                        <tr class="hover:bg-gray-800/60 transition duration-200">
+
+                            <td class="p-3 text-center">
+                                {{ t.date|date:"d M Y" }}
+                            </td>
+
+                            <td class="p-3">
+                                {{ t.category.name }}
+                            </td>
+
+                            <td class="p-3">
+                                {{ t.wallet.name }}
+                            </td>
+
+                            <td class="p-3 text-gray-400">
+                                {{ t.note|default:"-" }}
+                            </td>
+
+                            <td class="p-3 text-red-400 text-right font-semibold">
+                                {{ t.amount|rupiah }}
+                            </td>
+
+                            <td class="p-3 text-center">
+                                <button class="editBtn text-blue-400 hover:text-blue-300"
+                                        data-id="{{ t.id }}">
+                                    Edit
+                                </button>
+
+                                <a href="{% url 'transaction_delete' t.id %}"
+                                class="text-red-400 hover:text-red-300 ml-2">
+                                Hapus
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if tx_expense.paginator.num_pages > 1 %}
+        <div class="flex justify-center items-center gap-2 mt-4 text-sm">
+            {% if tx_expense.has_previous %}
+            <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.previous_page_number }}"
+            class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition">
+                Sebelumnya
+            </a>
+            {% endif %}
+            <span class="px-3 py-1 bg-gray-800 rounded">
+                {{ tx_expense.number }} / {{ tx_expense.paginator.num_pages }}
+            </span>
+            {% if tx_expense.has_next %}
+            <a href="?month={{ selected_month }}&year={{ selected_year }}&expense_page={{ tx_expense.next_page_number }}"
+            class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition">
+                Selanjutnya
+            </a>
+            {% endif %}
+        </div>
         {% endif %}
+    </div>
 </div>
 
 <!-- OVERLAY -->
 <div id="overlay"
-    class="fixed inset-0 bg-black bg-opacity-50 hidden opacity-0 transition-opacity duration-200">
+class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden opacity-0 transition"></div>
+
+<div id="toast"
+class="fixed bottom-5 left-1/2 -translate-x-1/2 
+bg-red-500 text-white px-5 py-3 rounded-xl
+opacity-0 pointer-events-none transition duration-300 z-[200]">
 </div>
 
-<!-- ADD TRANSACTION SHEET -->
-<div id="sheet"
-    class="fixed left-0 right-0 bottom-0 bg-gray-900 rounded-t-2xl shadow-xl p-5 hidden translate-y-full opacity-0 transition-all duration-200">
+<!-- SHEET -->
+<div id="sheet" class="sheet-responsive fintech-sheet fixed z-[120] p-5 shadow-2xl hidden opacity-0 scale-95 transition duration-300">
 
-    <h2 class="text-lg font-semibold mb-3">Tambah Transaksi</h2>
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-5">
+        <h2 class="text-lg font-semibold">Tambah Transaksi</h2>
+        <button id="closeAddSheetBtn"
+        class="text-red-400 hover:text-white text-xl font-bold">
+            ✕
+        </button>
+    </div>
 
-    <form method="POST" action="{% url 'transaction_add' %}">
+    <form method="POST" action="{% url 'transaction_add' %}"
+    class="space-y-4" novalidate>
+
         {% csrf_token %}
 
-        <input type="text" id="addAmountDisplay" class="w-full mb-2 p-2 bg-gray-800 rounded border border-gray-700" placeholder="Rp 0">
-        <p id="balanceWarning" class="text-red-400 text-sm hidden mb-2">
-            Saldo wallet tidak mencukupi
-        </p>
+        <!-- AMOUNT -->
+        <input type="text"
+        id="addAmountDisplay"
+        placeholder="Rp 0"
+        class="fintech-field fintech-amount">
+
         <input type="hidden" name="amount" id="addAmount">
 
-        <select name="type" id="addType"
-            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
-            <option value="expense" selected>Pengeluaran</option>
-            <option value="income">Pemasukan</option>
-        </select>
+        <p id="balanceWarning"
+        class="text-red-400 text-sm hidden">
+        Saldo wallet tidak mencukupi
+        </p>
 
-        <select name="wallet"
-            id="addWallet"
-            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
-            {% for w in wallets %}
-            <option value="{{ w.id }}" data-balance="{{ wallet_balances|get_item:w.id }}">
+        <!-- GRID -->
+        <div class="grid sm:grid-cols-2 gap-4">
+
+            <select id="addType" name="type">
+                <option value="">Pilih Tipe</option>
+                <option value="expense">Pengeluaran</option>
+                <option value="income">Pemasukan</option>
+            </select>
+
+            <select id="addWallet" name="wallet"  >
+                <option value="">Pilih Wallet</option>
+                {% for w in wallets %}
+                <option value="{{ w.id }}"
+                data-balance="{{ wallet_balances|get_item:w.id }}">
                 {{ w.name }}
-            </option>
-            {% endfor %}
-        </select>
+                </option>
+                {% endfor %}
+            </select>
 
-        <select name="category" id="addCategorySelect"
-            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+        </div>
+
+        <select id="addCategorySelect"
+        name="category"  >
+            <option value="">Pilih Kategori</option>
             {% for c in categories_income %}
             <option value="{{ c.id }}" data-type="income">{{ c.name }}</option>
             {% endfor %}
@@ -233,23 +581,94 @@
             {% endfor %}
         </select>
 
-        <input type="date" name="date"
-            value="{{ today }}"
-            class="w-full mb-3 p-2 bg-gray-800 rounded border border-gray-700">
+        <div class="grid grid-cols-2 gap-4">
+            <input type="date" name="date" value="{{ today }}" class="fintech-field">
 
-        <input type="text" name="note" placeholder="Catatan (opsional)"
-            class="w-full mb-5 p-2 bg-gray-800 rounded border border-gray-700">
-
-        <div class="flex justify-between">
-            <button type="button" id="cancelBtn"
-                class="px-4 py-2 rounded border border-gray-600 text-gray-300">
-                Cancel
-            </button>
-            <button type="submit"
-                class="px-4 py-2 rounded bg-indigo-600 text-white font-semibold">
-                Save
-            </button>
+            <input type="text" name="note" placeholder="Catatan" class="fintech-field">
         </div>
+
+        <!-- BUTTON -->
+        <button type="submit"
+        class="fintech-btn w-full text-white">
+            Simpan Transaksi
+        </button>
+
+    </form>
+</div>
+
+<!-- Edit Modal -->
+<div id="editSheet" class="sheet-responsive fintech-sheet fixed z-[120] p-5 shadow-2xl hidden opacity-0 scale-95 transition duration-300">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-5">
+        <h2 class="text-lg font-semibold">Edit Transaksi</h2>
+        <button id="closeEditSheetBtn"
+        class="text-red-400 hover:text-white text-xl font-bold">
+            ✕
+        </button>
+    </div>
+
+    <form id="editForm" method="POST" class="space-y-4" novalidate>
+
+        {% csrf_token %}
+
+        <!-- AMOUNT -->
+        <input type="text"
+        id="editAmountDisplay"
+        placeholder="Rp 0"
+        class="fintech-field fintech-amount">
+
+        <input type="hidden" name="amount" id="editAmount">
+
+        <p id="editBalanceWarning"
+        class="text-red-400 text-sm hidden">
+        Saldo wallet tidak mencukupi
+        </p>
+
+        <!-- GRID -->
+        <div class="grid sm:grid-cols-2 gap-4">
+
+            <select id="editType" name="type">
+                <option value="">Pilih Tipe</option>
+                <option value="expense">Pengeluaran</option>
+                <option value="income">Pemasukan</option>
+            </select>
+
+            <select id="editWallet" name="wallet"  >
+                <option value="">Pilih Wallet</option>
+                {% for w in wallets %}
+                <option value="{{ w.id }}"
+                data-balance="{{ wallet_balances|get_item:w.id }}">
+                {{ w.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+        </div>
+
+        <select id="editCategory"
+        name="category"  >
+            <option value="">Pilih Kategori</option>
+            {% for c in categories_income %}
+            <option value="{{ c.id }}" data-type="income">{{ c.name }}</option>
+            {% endfor %}
+            {% for c in categories_expense %}
+            <option value="{{ c.id }}" data-type="expense">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="grid grid-cols-2 gap-4">
+            <input type="date" id="editDate" name="date" value="{{ today }}" class="fintech-field">
+
+            <input type="text" id="editNote" name="note" placeholder="Catatan" class="fintech-field">
+        </div>
+
+        <!-- BUTTON -->
+        <button type="submit"
+        class="fintech-btn w-full text-white">
+            Simpan Transaksi
+        </button>
+
     </form>
 </div>
 
@@ -258,41 +677,93 @@
 {% block extra_script %}
 <script>
 const btn = document.getElementById('addBtn');
-const overlay = document.getElementById('overlay');
+const sheetOverlay = document.getElementById('overlay');
 const sheet = document.getElementById('sheet');
-const cancel = document.getElementById('cancelBtn');
-
-function openSheet() {
-    overlay.classList.remove('hidden');
-    sheet.classList.remove('hidden');
-
-    requestAnimationFrame(() => {
-        overlay.classList.remove('opacity-0');
-        sheet.classList.remove('opacity-0', 'translate-y-full');
-    });
-
-    checkBalance();
-}
-
-function closeSheet() {
-    overlay.classList.add('opacity-0');
-    sheet.classList.add('opacity-0', 'translate-y-full');
-
-    setTimeout(() => {
-        overlay.classList.add('hidden');
-        sheet.classList.add('hidden');
-    }, 200);
-}
-
-btn.onclick = openSheet;
-overlay.onclick = closeSheet;
-cancel.onclick = closeSheet;
-
-// 🔥 FILTER CATEGORY
+const editSheet = document.getElementById('editSheet');
 const typeSelect = document.getElementById('addType');
 const categorySelect = document.getElementById('addCategorySelect');
 
+let addValidationReady = false;
+let validateEdit = null;
+
+function openSheet(){
+    sheetOverlay.classList.remove("hidden");
+    sheet.classList.remove("hidden");
+
+    requestAnimationFrame(()=>{
+        sheetOverlay.classList.remove("opacity-0");
+        sheet.classList.remove("opacity-0","scale-95");
+    });
+
+    const addTypeEl = document.querySelector("#addType");
+
+    if(addTypeEl && !addTypeEl.tomselect){
+
+        new TomSelect("#addType",{searchField:false});
+        new TomSelect("#addWallet",{searchField:false});
+        new TomSelect("#addCategorySelect",{searchField:false});
+
+        document
+        .querySelector("#addType")
+        .tomselect.on('change', filterCategory);
+
+        filterCategory();
+
+        setupBalanceValidation({
+            typeId:'addType',
+            walletId:'addWallet',
+            amountId:'addAmount',
+            warningId:'balanceWarning',
+            submitSelector:'#sheet button[type="submit"]',
+        });
+
+        addValidationReady = true;
+    }
+}
+
+function closeSheet(){
+
+    sheetOverlay.classList.add("opacity-0");
+    sheet.classList.add("opacity-0","scale-95");
+
+    setTimeout(()=>{
+        sheetOverlay.classList.add("hidden");
+        sheet.classList.add("hidden");
+    },200);
+}
+
+document.getElementById('closeAddSheetBtn')?.addEventListener('click', closeSheet);
+
+document.getElementById('closeEditSheetBtn')?.addEventListener('click', ()=>{
+    sheetOverlay.classList.add("opacity-0");
+    editSheet.classList.add("opacity-0","scale-95");
+
+    setTimeout(()=>{
+        sheetOverlay.classList.add("hidden");
+        editSheet.classList.add("hidden");
+    },200);
+});
+
+btn?.addEventListener('click', openSheet);
+
+function closeEditSheet(){
+
+    sheetOverlay.classList.add("opacity-0");
+    editSheet.classList.add("opacity-0","scale-95");
+
+    setTimeout(()=>{
+        sheetOverlay.classList.add("hidden");
+        editSheet.classList.add("hidden");
+    },200);
+}
+
+sheetOverlay.addEventListener('click', closeAllSheets);
+
 function filterCategory() {
+
+    const typeSelect = document.querySelector('#addType');
+    const categorySelect = document.querySelector('#addCategorySelect');
+
     const type = typeSelect.value;
     const options = categorySelect.querySelectorAll('option');
 
@@ -304,60 +775,201 @@ function filterCategory() {
     if (first) categorySelect.value = first.value;
 }
 
-typeSelect.addEventListener('change', filterCategory);
-filterCategory();
-
 function formatRupiah(angka) {
     return new Intl.NumberFormat('id-ID').format(angka);
 }
 
-const amountDisplayAdd = document.getElementById('addAmountDisplay');
-const amountHiddenAdd  = document.getElementById('addAmount');
-
-if (amountDisplayAdd && amountHiddenAdd) {
-    amountDisplayAdd.addEventListener('input', function () {
-        let raw = this.value.replace(/\D/g, '');
-
-        // simpan angka murni ke hidden input
-        amountHiddenAdd.value = raw;
-
-        // tampilkan format rupiah
-        this.value = raw ? 'Rp ' + formatRupiah(raw) : '';
-
-        checkBalance();
-    });
-}
-
-const typeSelectAdd   = document.getElementById('addType');
-const walletSelectAdd = document.getElementById('addWallet');
 const amountInputAdd  = document.getElementById('addAmount');
 const submitBtnAdd    = document.querySelector('#sheet button[type="submit"]');
 const warningText     = document.getElementById('balanceWarning');
 
-function checkBalance() {
-    if (!typeSelectAdd || !walletSelectAdd || !amountInputAdd) return;
+const form = document.querySelector("#sheet form");
 
-    const type = typeSelectAdd.value;
-    const amount = parseInt(amountInputAdd.value || 0);
+form.addEventListener("submit", function(e){
 
-    const selectedWallet = walletSelectAdd.options[walletSelectAdd.selectedIndex];
-    const walletBalance = parseInt(selectedWallet.dataset.balance || 0);
+    const type = document.getElementById("addType").value;
+    const wallet = document.getElementById("addWallet").value;
+    const category = document.getElementById("addCategorySelect").value;
+    const amount = document.getElementById("addAmount").value;
+    const date = document.querySelector("input[name='date']").value;
 
-    // hanya validasi untuk pengeluaran
-    if (type === 'expense' && amount > 0 && amount > walletBalance) {
-        warningText.classList.remove('hidden');
-        submitBtnAdd.disabled = true;
-        submitBtnAdd.classList.add('opacity-50', 'cursor-not-allowed');
-    } else {
-        warningText.classList.add('hidden');
-        submitBtnAdd.disabled = false;
-        submitBtnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+    if(!type || !wallet || !category || !amount || !date){
+
+        e.preventDefault();
+
+        showToast("⚠️ Semua field wajib diisi bro!");
+
+        return;
     }
+
+});
+function showToast(msg){
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = msg;
+    toast.classList.remove("opacity-0");
+
+    setTimeout(()=>{
+        toast.classList.add("opacity-0");
+    },2500);
 }
 
-// trigger di event penting
-typeSelectAdd.addEventListener('change', checkBalance);
-walletSelectAdd.addEventListener('change', checkBalance);
-amountInputAdd.addEventListener('input', checkBalance);
+document.querySelectorAll('.editBtn').forEach(btn=>{
+
+    btn.addEventListener('click', async function(){
+
+        const id = this.dataset.id;
+
+        const res = await fetch(`/transactions/${id}/json/`);
+        if(!res.ok){
+            showToast("Gagal ambil data transaksi 😢");
+            return;
+        }
+
+        const data = await res.json();
+
+        const amt = document.querySelector('#editAmountDisplay');
+
+        setTimeout(()=>{
+            amt.focus();
+            amt.setSelectionRange(amt.value.length, amt.value.length);
+        },150);
+
+        sheetOverlay.classList.remove("hidden");
+        editSheet.classList.remove("hidden");
+
+        requestAnimationFrame(()=>{
+            sheetOverlay.classList.remove("opacity-0");
+            editSheet.classList.remove("opacity-0","scale-95");
+        });
+
+        // ⭐ INIT tomselect dulu!
+        const editTypeEl = document.querySelector("#editType");
+
+        if(editTypeEl && !editTypeEl.tomselect){
+            new TomSelect("#editType",{searchField:false});
+            new TomSelect("#editWallet",{searchField:false});
+            new TomSelect("#editCategory",{searchField:false});
+
+            validateEdit = setupBalanceValidation({
+            typeId:'editType',
+            walletId:'editWallet',
+            amountId:'editAmount',
+            warningId:'editBalanceWarning',
+            submitSelector:'#editSheet button[type="submit"]'
+            });
+        }
+
+        document.querySelector('#editAmount').value = data.amount;
+        document.querySelector('#editType').tomselect.setValue(data.type, true);
+        document.querySelector('#editWallet').tomselect.setValue(data.wallet, true);
+        document.querySelector('#editCategory').tomselect.setValue(data.category, true);
+        document.querySelector('#editDate').value = data.date;
+        document.querySelector('#editNote').value = data.note;
+
+        document.querySelector('#editForm')
+            .action = `/transactions/${id}/edit/`;
+
+        document.querySelector('#editAmountDisplay').value =
+            'Rp ' + formatRupiah(data.amount);
+
+        requestAnimationFrame(() => {
+            validateEdit?.();
+        });
+    });
+});
+
+function setupBalanceValidation({
+    typeId,
+    walletId,
+    amountId,
+    warningId,
+    submitSelector
+    }){
+
+    const typeSelect   = document.getElementById(typeId);
+    const walletSelect = document.getElementById(walletId);
+    const amountInput  = document.getElementById(amountId);
+    const warningText  = document.getElementById(warningId);
+    const submitBtn    = document.querySelector(submitSelector);
+
+    if(!typeSelect || !walletSelect || !amountInput) return;
+
+    function checkBalance(){
+
+        const type = typeSelect.value;
+        const amount = parseInt(amountInput.value || 0);
+
+        const walletId = walletSelect.value;
+
+        const selectedWallet = walletSelect.querySelector(`option[value="${walletId}"]`);
+
+        if(!selectedWallet?.value){
+            warningText.classList.add('hidden');
+            submitBtn.disabled = false;
+            return;
+        }
+
+        const walletBalance =
+            parseInt(selectedWallet.dataset.balance || 0);
+
+        if(type === 'expense' && amount > walletBalance){
+
+            warningText.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50','cursor-not-allowed');
+
+        }else{
+
+            warningText.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50','cursor-not-allowed');
+        }
+    }
+
+    if(typeSelect.tomselect){
+    typeSelect.tomselect.on('change', checkBalance);
+    }else{
+        typeSelect.addEventListener('change', checkBalance);
+    }
+
+    if(walletSelect.tomselect){
+        walletSelect.tomselect.on('change', checkBalance);
+    }else{
+        walletSelect.addEventListener('change', checkBalance);
+    }
+
+    amountInput.addEventListener('input', checkBalance);
+
+    return checkBalance;
+}
+
+function setupRupiahInput(displayId, hiddenId){
+
+    const display = document.getElementById(displayId);
+    const hidden  = document.getElementById(hiddenId);
+
+    if(!display || !hidden) return;
+
+    if(display.dataset.init === "true") return;
+    display.dataset.init = "true";
+
+    display.addEventListener('input', function(){
+
+        let raw = this.value.replace(/\D/g,'');
+
+        hidden.value = raw;
+        this.value = raw ? 'Rp ' + formatRupiah(raw) : '';
+    });
+}
+
+setupRupiahInput('addAmountDisplay','addAmount');
+setupRupiahInput('editAmountDisplay','editAmount');
+
+function closeAllSheets(){
+    closeSheet();
+    closeEditSheet();
+}
 </script>
 {% endblock %}

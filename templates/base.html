@@ -5,8 +5,9 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>{% block title %}SpendGuard{% endblock %}</title>
  <script src="https://cdn.tailwindcss.com"></script>
+ <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
 </head>
-<body class="h-screen bg-gray-950 text-gray-100 overflow-hidden">
+<body class="h-screen bg-gray-950 text-gray-100">
 
   <!-- Mobile Topbar -->
   <div class="md:hidden fixed top-0 left-0 right-0 z-50
@@ -89,42 +90,122 @@
     {% block extra_script %}{% endblock %}
 
     {% if messages %}
-      <div id="snackbar-container" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
-      {% for message in messages %}
-      <div class="snackbar px-4 py-3 rounded-lg text-sm shadow-lg
-          {% if message.tags == 'success' %} bg-green-500 text-white
-          {% elif message.tags == 'error' %} bg-red-500 text-white
-          {% else %} bg-gray-800 text-white
-          {% endif %}">
-        {{ message }}
-      </div>
-      {% endfor %}
+      <div id="snackbar-container">
+
+        {% for message in messages %}
+        <div class="snackbar {{ message.tags }}">
+
+            <span class="snack-icon">
+              {% if message.tags == 'success' %}
+                  ✓
+              {% elif message.tags == 'error' %}
+                  !
+              {% else %}
+                  i
+              {% endif %}
+            </span>
+
+            <span>{{ message }}</span>
+
+        </div>
+        {% endfor %}
+
     </div>
     {% endif %}
   </div>
 
   <style>
-  .snackbar {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: snack-in .35s ease forwards;
-    min-width: 200px;
-    text-align: center;
-    border-radius: 8px;
+  #snackbar-container{
+    position:fixed;
+    z-index:9999;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  /* MOBILE */
+  @media(max-width:640px){
+      #snackbar-container{
+          left:50%;
+          bottom:20px;
+          transform:translateX(-50%);
+          width:90%;
+          align-items:center;
+      }
   }
 
-  @keyframes snack-in {
-    0%   { opacity:0; transform: translateY(20px); }
-    100% { opacity:1; transform: translateY(0); }
+  /* TABLET + DESKTOP */
+  @media(min-width:641px){
+      #snackbar-container{
+          right:24px;
+          bottom:24px;
+          align-items:flex-end;
+      }
   }
 
-  .snackbar.hide {
-    animation: snack-out .35s ease forwards;
+  /* snackbar */
+  .snackbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+
+      padding:14px 18px;
+      border-radius:14px;
+
+      backdrop-filter: blur(14px);
+
+      color:white;
+      font-weight:500;
+      letter-spacing:.2px;
+
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+      opacity:0;
+      transform:translateY(30px) scale(.95);
+      animation:snackIn .35s ease forwards;
   }
 
-  @keyframes snack-out {
-    0%   { opacity:1; transform: translateY(0); }
-    100% { opacity:0; transform: translateY(20px); }
+  /* colors */
+  .snackbar.success{
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+  }
+
+  .snackbar.error{
+      background:linear-gradient(135deg,#ef4444,#dc2626);
+  }
+
+  .snackbar.info{
+      background:linear-gradient(135deg,#6366f1,#4f46e5);
+  }
+
+  /* icon bubble */
+  .snack-icon{
+      width:26px;
+      height:26px;
+      border-radius:7px;
+      background:rgba(255,255,255,.2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+  }
+
+  /* animation */
+  @keyframes snackIn{
+      to{
+          opacity:1;
+          transform:translateY(0) scale(1);
+      }
+  }
+
+  .snackbar.hide{
+      animation:snackOut .35s ease forwards;
+  }
+
+  @keyframes snackOut{
+      to{
+          opacity:0;
+          transform:translateY(20px) scale(.95);
+      }
   }
 
   button,
@@ -138,16 +219,15 @@
     -webkit-tap-highlight-color: transparent;
   }
   </style>
-
-
   <script>
   const sb = document.getElementById('snackbar-container');
-  if (sb) {
-    setTimeout(() => {
-      const items = sb.querySelectorAll('.snackbar');
-      items.forEach(el => el.classList.add('hide'));
-      setTimeout(() => sb.remove(), 350);
-    }, 3000);
+  if(sb){
+    setTimeout(()=>{
+        document.querySelectorAll('.snackbar')
+        .forEach(el => el.classList.add('hide'));
+
+        setTimeout(()=> sb.remove(), 400);
+    },2800);
   }
 
   // Hamburger Menu
@@ -165,6 +245,7 @@
     overlay.classList.add('hidden');
   });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 </body>
 </html>

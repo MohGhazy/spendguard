@@ -88,8 +88,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 max-w-xl md:max-w-2xl lg:max-w-none mx-auto mt-4 sm:mt-6">
 
         <!-- EXPENSE BLOCK -->
-        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 animate-fade-up">
-            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm mb-2 sm:mb-3 text-center">Rincian Pengeluaran</h2>
+        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl w-full max-w-[320px] sm:max-w-none lg:max-w-none lg:w-full mx-auto lg:mx-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl animate-fade-up">
+            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm lg:text-base mb-2 sm:mb-3 text-center">Rincian Pengeluaran</h2>
 
             {% if donut_values %}
             <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
@@ -106,13 +106,13 @@
             </div>
 
             {% else %}
-            <div class="text-gray-500">Tidak ada data pengeluaran.</div>
+            <div class="text-gray-500 text-center">Tidak ada data pengeluaran.</div>
             {% endif %}
         </div>
 
         <!-- WALLET BLOCK -->
-        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl max-w-[320px] sm:max-w-none mx-auto transition-all duration-200 hover:-translate-y-1 hover:shadow-xl animate-fade-up">
-            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm mb-2 sm:mb-3 text-center">Rincian Dompet</h2>
+        <div class="bg-gray-800 p-2 sm:p-4 rounded-lg sm:rounded-xl w-full max-w-[320px] sm:max-w-none lg:max-w-none lg:w-full mx-auto lg:mx-0 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl animate-fade-up">
+            <h2 class="font-semibold py-1 sm:py-0 text-[11px] sm:text-sm lg:text-base mb-2 sm:mb-3 text-center">Rincian Dompet</h2>
 
             {% if wallet_values %}
             <div class="relative w-full max-w-[200px] sm:max-w-[260px] lg:max-w-[320px] h-28 sm:h-40 lg:h-56 mx-auto mb-3 animate-fade-up [animation-delay:.15s] hover:shadow-indigo-500/10">
@@ -129,14 +129,14 @@
             </div>
             
             {% else %}
-            <div class="text-gray-500">Tidak ada data dompet.</div>
+            <div class="text-gray-500 text-center">Tidak ada data dompet.</div>
             {% endif %}
         </div>
 
     </div>
 
     <!-- RECENT TRANSACTIONS -->
-    <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 mt-4 sm:mt-6">Transaksi Terbaru</h2>
+    <h2 class="font-semibold text-sm sm:text-base mb-2 sm:mb-3 mt-6 sm:mt-6">Transaksi Terbaru</h2>
 
     <!-- DESKTOP TABLE -->
     <div class="hidden sm:block overflow-x-auto rounded-xl border border-gray-700 animate-fade-up will-change-transform">
@@ -289,139 +289,101 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const donutLabels = JSON.parse(
-    document.getElementById('donut-labels').textContent
-);
+document.addEventListener("DOMContentLoaded", function(){
+    const donutEl = document.getElementById('donut-labels');
+    const donutValEl = document.getElementById('donut-values');
+    const walletEl = document.getElementById('wallet-labels');
+    const walletValEl = document.getElementById('wallet-values');
 
-const donutValues = JSON.parse(
-    document.getElementById('donut-values').textContent
-);
+    const expenseCanvas = document.getElementById('expenseDonut');
+    const walletCanvas = document.getElementById('walletDonut');
 
-const walletLabels = JSON.parse(
-    document.getElementById('wallet-labels').textContent
-);
+    let expenseChart;
+    let walletChart;
 
-const walletValues = JSON.parse(
-    document.getElementById('wallet-values').textContent
-);
+    if(
+        donutEl && donutValEl &&
+        walletEl && walletValEl &&
+        expenseCanvas && walletCanvas
+    ){
 
-const ctx = document.getElementById('expenseDonut');
-var ctx2 = document.getElementById('walletDonut').getContext('2d');
+        const donutLabels = JSON.parse(donutEl.textContent);
+        const donutValues = JSON.parse(donutValEl.textContent);
+        const walletLabels = JSON.parse(walletEl.textContent);
+        const walletValues = JSON.parse(walletValEl.textContent);
 
-let expenseChart;
-let walletChart;
+        function renderCharts(){
 
-function renderCharts(){
+            const isMobile = window.innerWidth < 640;
 
-    const w = window.innerWidth;
+            if(expenseChart) expenseChart.destroy();
+            if(walletChart) walletChart.destroy();
 
-    const isMobile = w < 640;
-    const isTablet = w >= 640 && w < 1024;
-
-    if(expenseChart) expenseChart.destroy();
-    if(walletChart) walletChart.destroy();
-
-    expenseChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: donutLabels,
-            datasets: [{
-                data: donutValues,
-                backgroundColor: ['#ec4899','#3b82f6','#10b981','#f59e0b','#e11d48','#6366f1','#84cc16','#14b8a6'],
-            }]
-        },
-        options: {
-            responsive:true,
-            maintainAspectRatio:false,
-            plugins:{
-                legend:{
-                    position:isMobile?'bottom':'top',
-                    labels:{
-                        usePointStyle:true,
-                        pointStyle:'circle',
-                        
-                        boxWidth: isMobile ? 6 : 9,
-                        boxHeight: isMobile ? 6 : 9,
-
-                        padding: isMobile ? 6 : 9,
-
-                        font:{ 
-                            size: isMobile ? 9 : 11,
-                            weight:'500'
+            expenseChart = new Chart(expenseCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: donutLabels,
+                    datasets: [{
+                        data: donutValues,
+                        backgroundColor: [
+                            '#ec4899','#3b82f6','#10b981','#f59e0b',
+                            '#e11d48','#6366f1','#84cc16','#14b8a6'
+                        ],
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{
+                            position:isMobile?'bottom':'top',
+                            labels:{
+                                usePointStyle:true,
+                                pointStyle:'circle',
+                                boxWidth:isMobile?6:9,
+                                padding:isMobile?6:9,
+                                font:{size:isMobile?9:11}
+                            }
                         }
                     }
                 }
-            }
-        }
-    });
+            });
 
-    walletChart = new Chart(ctx2,{
-        type:'doughnut',
-        data:{
-            labels:walletLabels,
-            datasets:[{
-                data:walletValues,
-                backgroundColor:['#10b981','#6366f1','#f59e0b','#ef4444','#3b82f6','#14b8a6','#e11d48','#84cc16'],
-            }]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:false,
-            plugins:{
-                legend:{
-                    position:isMobile?'bottom':'top',
-                    labels:{
-                        usePointStyle:true,
-                        pointStyle:'circle',
-                        
-                        boxWidth: isMobile ? 6 : 9,
-                        boxHeight: isMobile ? 6 : 9,
-
-                        padding: isMobile ? 6 : 9,
-
-                        font:{ 
-                            size: isMobile ? 9 : 11,
-                            weight:'500'
+            walletChart = new Chart(walletCanvas, {
+                type:'doughnut',
+                data:{
+                    labels:walletLabels,
+                    datasets:[{
+                        data:walletValues,
+                        backgroundColor:[
+                            '#10b981','#6366f1','#f59e0b','#ef4444',
+                            '#3b82f6','#14b8a6','#e11d48','#84cc16'
+                        ],
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{
+                            position:isMobile?'bottom':'top',
+                            labels:{
+                                usePointStyle:true,
+                                pointStyle:'circle',
+                                boxWidth:isMobile?6:9,
+                                padding:isMobile?6:9,
+                                font:{size:isMobile?9:11}
+                            }
                         }
                     }
                 }
-            }
+            });
         }
-    });
-}
 
-renderCharts();
-
-window.addEventListener("resize", renderCharts);
-</script>
-
-<script>
-
-const typeSelect = document.querySelector('select[name="type"]')
-const categorySelect = document.getElementById('categorySelect');
-
-function filterCategory() {
-    const type = typeSelect.value;
-    const options = categorySelect.querySelectorAll('option');
-
-    options.forEach(opt => {
-        if (opt.dataset.type === type) {
-            opt.style.display = 'block';
-        } else {
-            opt.style.display = 'none';
-        }
-    });
-
-    // auto set ke opsi pertama yang match
-    const first = [...options].find(o => o.dataset.type === type);
-    if (first) categorySelect.value = first.value;
-}
-
-typeSelect.addEventListener('change', filterCategory);
-
-// trigger saat load
-filterCategory();
-
+        renderCharts();
+        window.addEventListener("resize", renderCharts);
+    }
+});
 </script>
 
 {% endblock %}
