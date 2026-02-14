@@ -779,13 +779,30 @@ function openSheet(){
 
         new TomSelect("#addType",{searchField:false});
         new TomSelect("#addWallet",{searchField:false});
-        new TomSelect("#addCategorySelect",{searchField:false});
+        new TomSelect("#addCategorySelect",{
+            searchField:false,
+            onInitialize(){
+                const select = this.input;
+                const options = select.querySelectorAll('option');
+
+                options.forEach(opt=>{
+                    const val = opt.value;
+                    if(!val) return;
+
+                    this.options[val].customProperties = {
+                        type: opt.dataset.type
+                    };
+                });
+            }
+        });
 
         document
         .querySelector("#addType")
-        .tomselect.on('change', filterCategory);
+        .tomselect.on('change', ()=> {
+            filterCategoryByType('addType','addCategorySelect');
+        });
 
-        filterCategory();
+        filterCategoryByType('addType','addCategorySelect');
 
         setupBalanceValidation({
             typeId:'addType',
@@ -836,22 +853,6 @@ function closeEditSheet(){
 }
 
 sheetOverlay.addEventListener('click', closeAllSheets);
-
-function filterCategory() {
-
-    const typeSelect = document.querySelector('#addType');
-    const categorySelect = document.querySelector('#addCategorySelect');
-
-    const type = typeSelect.value;
-    const options = categorySelect.querySelectorAll('option');
-
-    options.forEach(opt => {
-        opt.hidden = opt.dataset.type !== type;
-    });
-
-    const first = [...options].find(o => o.dataset.type === type);
-    if (first) categorySelect.value = first.value;
-}
 
 function formatRupiah(angka) {
     return new Intl.NumberFormat('id-ID').format(angka);
@@ -928,7 +929,22 @@ document.querySelectorAll('.editBtn').forEach(btn=>{
         if(editTypeEl && !editTypeEl.tomselect){
             new TomSelect("#editType",{searchField:false});
             new TomSelect("#editWallet",{searchField:false});
-            new TomSelect("#editCategory",{searchField:false});
+            new TomSelect("#editCategory",{
+                searchField:false,
+                onInitialize(){
+                    const select = this.input;
+                    const options = select.querySelectorAll('option');
+
+                    options.forEach(opt=>{
+                        const val = opt.value;
+                        if(!val) return;
+
+                        this.options[val].customProperties = {
+                            type: opt.dataset.type
+                        };
+                    });
+                }
+            });
 
             validateEdit = setupBalanceValidation({
             typeId:'editType',
@@ -939,10 +955,20 @@ document.querySelectorAll('.editBtn').forEach(btn=>{
             });
         }
 
+        document.querySelector("#editType").tomselect.on('change', ()=>{
+            filterCategoryByType('editType','editCategory');
+        });
+
         document.querySelector('#editAmount').value = data.amount;
+        
         document.querySelector('#editType').tomselect.setValue(data.type, true);
         document.querySelector('#editWallet').tomselect.setValue(data.wallet, true);
-        document.querySelector('#editCategory').tomselect.setValue(data.category, true);
+
+        setTimeout(()=>{
+            filterCategoryByType('editType','editCategory');
+            document.querySelector('#editCategory').tomselect.setValue(data.category, true);
+        },50);
+
         document.querySelector('#editDate').value = data.date;
         document.querySelector('#editNote').value = data.note;
 
@@ -1021,6 +1047,55 @@ function setupBalanceValidation({
     amountInput.addEventListener('input', checkBalance);
 
     return checkBalance;
+}
+
+function filterCategoryByType(typeSelectId, categorySelectId){
+
+    const typeEl = document.getElementById(typeSelectId);
+    const catEl  = document.getElementById(categorySelectId);
+
+    if(!typeEl || !catEl) return;
+
+    const type = typeEl.value;
+
+    const originalOptions = catEl.querySelectorAll("option");
+
+    if(!catEl.tomselect){
+        originalOptions.forEach(opt=>{
+            if(!opt.dataset.type) return;
+            opt.hidden = opt.dataset.type !== type;
+        });
+        return;
+    }
+
+    const ts = catEl.tomselect;
+
+    // ⭐ RESET VALUE LAMA (INI YANG KAMU KURANG)
+    ts.clear(true);
+
+    // hapus semua option lama
+    ts.clearOptions();
+
+    let firstValid = null;
+
+    originalOptions.forEach(opt=>{
+        if(!opt.value) return;
+        if(opt.dataset.type !== type) return;
+
+        ts.addOption({
+            value: opt.value,
+            text: opt.textContent
+        });
+
+        if(!firstValid) firstValid = opt.value;
+    });
+
+    ts.refreshOptions(false);
+
+    // ⭐ SET DEFAULT BARU
+    if(firstValid){
+        ts.setValue(firstValid, true);
+    }
 }
 
 function setupRupiahInput(displayId, hiddenId){
