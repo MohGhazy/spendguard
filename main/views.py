@@ -140,37 +140,70 @@ def dashboard_view(request):
 
 @login_required
 def onboard_wallet(request):
- if request.method == 'POST':
-  name = request.POST.get('name')
-  balance = request.POST.get('balance') or 0
 
-  Wallet.objects.create(
-   user=request.user,
-   name=name,
-   initial_balance=balance
-  )
+    if request.method == 'POST':
+        raw = request.POST.get('name')
 
-  return redirect('onboard_income')
+        if raw:
+            wallets = [w.strip() for w in raw.split(",") if w.strip()]
 
- return render(request, 'main/onboard_wallet.html')
+            for item in wallets:
 
+                wallet_name = item
+                balance_raw = "0"   # selalu string dulu
+
+                if ":" in item:
+                    wallet_name, balance_raw = item.split(":", 1)
+
+                wallet_name = wallet_name.strip()
+                balance_raw = balance_raw.strip()
+
+                # convert saldo ke angka
+                try:
+                    balance = int(balance_raw)
+                except:
+                    balance = 0
+
+                if wallet_name:
+                    Wallet.objects.create(
+                        user=request.user,
+                        name=wallet_name,
+                        initial_balance=balance
+                    )
+
+        return redirect('onboard_income')
+
+    return render(request, 'main/onboard_wallet.html')
 
 @login_required
 def onboard_income(request):
- if request.method == 'POST':
-  selected = request.POST.getlist('categories')
-  custom = request.POST.get('custom')
+    if request.method == 'POST':
+        selected = request.POST.getlist('categories')
+        custom = request.POST.get('custom')
 
-  for cat in selected:
-   Category.objects.create(user=request.user, name=cat, type='income')
+        # default checkbox
+        for cat in selected:
+            Category.objects.create(
+                user=request.user,
+                name=cat,
+                type='income'
+            )
 
-  if custom:
-   Category.objects.create(user=request.user, name=custom, type='income')
+        # 🔥 split dari koma
+        if custom:
+            names = [n.strip() for n in custom.split(",") if n.strip()]
 
-  return redirect('onboard_expense')
+            for name in names:
+                Category.objects.create(
+                    user=request.user,
+                    name=name,
+                    type='income'
+                )
 
- income_defaults = ['Gajian', 'Beasiswa', 'Investasi']
- return render(request, 'main/onboard_income.html', {'defaults': income_defaults})
+        return redirect('onboard_expense')
+
+    income_defaults = ['Gajian', 'Beasiswa', 'Investasi']
+    return render(request, 'main/onboard_income.html', {'defaults': income_defaults})
 
 @login_required
 def onboard_expense(request):
@@ -178,11 +211,24 @@ def onboard_expense(request):
         selected = request.POST.getlist('categories')
         custom = request.POST.get('custom')
 
+        # default checkbox
         for cat in selected:
-            Category.objects.create(user=request.user, name=cat, type='expense')
+            Category.objects.create(
+                user=request.user,
+                name=cat,
+                type='expense'
+            )
 
+        # 🔥 split dari koma
         if custom:
-            Category.objects.create(user=request.user, name=custom, type='expense')
+            names = [n.strip() for n in custom.split(",") if n.strip()]
+
+            for name in names:
+                Category.objects.create(
+                    user=request.user,
+                    name=name,
+                    type='expense'
+                )
 
         profile = Profile.objects.get(user=request.user)
         profile.is_onboarded = True
