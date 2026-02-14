@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     @keyframes warpIn {
       0%   { opacity:0; transform:scale(1.6); filter:blur(20px) brightness(2.2); }
@@ -21,32 +24,65 @@
     }
   </style>
 </head>
-<body onload="warpInAnim()" class="bg-gray-950 flex justify-center items-center min-h-screen relative overflow-hidden">
+
+<body onload="warpInAnim()" class="bg-gray-950 min-h-screen flex items-center justify-center relative overflow-hidden px-4 sm:px-6">
+
+  <!-- Glow Background -->
+  <div class="absolute w-[500px] h-[500px] bg-indigo-600/20 blur-[140px] rounded-full"></div>
+  <div class="absolute w-[350px] h-[350px] bg-purple-600/20 blur-[120px] rounded-full top-10 left-10"></div>
+  <div class="absolute w-[350px] h-[350px] bg-indigo-600/20 blur-[120px] rounded-full bottom-10 right-10"></div>
 
   <!-- Orbit Background -->
-  <div class="absolute w-72 h-72 rounded-full border border-indigo-500/30 animate-[orbit_14s_linear_infinite]"></div>
-  <div class="absolute w-72 h-72 rounded-full border border-indigo-500/10 animate-[orbit_20s_linear_reverse_infinite]"></div>
+  <div class="absolute w-60 h-60 sm:w-72 sm:h-72 rounded-full border border-indigo-500/30 animate-[orbit_14s_linear_infinite]"></div>
+  <div class="absolute w-60 h-60 sm:w-72 sm:h-72 rounded-full border border-indigo-500/10 animate-[orbit_20s_linear_reverse_infinite]"></div>
 
   <!-- Login Card -->
-  <div id="loginCard" class="w-full max-w-sm p-8 rounded-2xl bg-gray-900/70 backdrop-blur-xl border border-gray-800 shadow-2xl">
-    
-    <h2 class="text-2xl text-white font-semibold text-center mb-2">
+  <div id="loginCard"
+       class="w-full max-w-sm sm:max-w-md p-6 sm:p-8 rounded-2xl 
+              bg-gray-900/70 backdrop-blur-xl border border-gray-800 
+              shadow-2xl hover:scale-[1.01] transition duration-300">
+
+    <h2 class="text-2xl sm:text-3xl text-white font-semibold text-center mb-2">
       Spend<span class="text-indigo-400">Guard</span>
     </h2>
 
-    <p class="text-center text-gray-400 mb-6">Masuk ke akun Anda</p>
+    <p class="text-center text-gray-400 mb-6 text-sm sm:text-base">
+      Masuk ke akun Anda
+    </p>
 
     {% if error %}
-    <div class="mb-4 text-center py-2 rounded-lg bg-red-600/30 text-red-300 border border-red-500/40">
+    <div class="mb-4 text-center py-2 rounded-lg bg-red-600/30 text-red-300 border border-red-500/40 text-sm">
       {{ error }}
     </div>
     {% endif %}
 
-    <form method="POST" class="space-y-4">
+    <form method="POST" class="space-y-4" onsubmit="disableBtn(this)">
       {% csrf_token %}
-      <input name="username" placeholder="Username" class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-      <input type="password" name="password" placeholder="Password" class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"/>
-      <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg active:scale-95 transition">
+
+      <input 
+        type="text"
+        name="username"
+        placeholder="Username"
+        required
+        autofocus
+        class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 
+               text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none
+               text-sm sm:text-base"/>
+
+      <input 
+        type="password"
+        name="password"
+        placeholder="Password"
+        required
+        class="w-full px-4 py-3 rounded-lg bg-gray-800/80 border border-gray-700 
+               text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none
+               text-sm sm:text-base"/>
+
+      <button 
+        class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 
+               text-white rounded-lg active:scale-95 
+               hover:shadow-lg hover:shadow-indigo-500/30 
+               transition-all duration-200">
         Login
       </button>
     </form>
@@ -57,19 +93,27 @@
         Daftar
       </button>
     </p>
+
   </div>
 
 <script>
   function goRegister(){
     const card = document.getElementById('loginCard');
-    card.style.animation = "warpOut 0.45s cubic-bezier(.25,.8,.25,1) forwards";
+    card.style.animation = "warpOut 0.45s cubic-bezier(.16,1,.3,1) forwards";
     setTimeout(()=> {
       window.location.href = "/accounts/register";
     }, 460);
   }
+
   function warpInAnim(){
     const card = document.getElementById('loginCard');
-    card.style.animation = "warpIn 0.5s cubic-bezier(.25,.8,.25,1) forwards";
+    card.style.animation = "warpIn 0.5s cubic-bezier(.16,1,.3,1) forwards";
+  }
+
+  function disableBtn(form){
+    const btn = form.querySelector("button");
+    btn.disabled = true;
+    btn.innerText = "Loading...";
   }
 </script>
 

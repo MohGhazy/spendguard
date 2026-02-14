@@ -328,6 +328,7 @@ def transaction_edit(request, tx_id):
         tx.note = request.POST.get('note', '')
         tx.save()
 
+        messages.success(request, "Transaksi Berhasil Diedit")
         return redirect('transactions')
 
     context = {

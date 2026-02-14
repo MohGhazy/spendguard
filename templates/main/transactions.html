@@ -61,6 +61,55 @@
     background:linear-gradient(135deg,#6366f1,#4f46e5);
 }
 
+/* ===== ACTION BUTTONS ===== */
+.action-btn{
+    position:relative;
+    cursor: pointer;
+    transition:
+        transform .12s ease,
+        color .15s ease,
+        opacity .15s ease;
+}
+
+/* hover naik dikit */
+.action-btn:hover{
+    transform:translateY(-1px);
+}
+
+/* klik shrink */
+.action-btn:active{
+    transform:scale(.95);
+    opacity:.7;
+}
+
+/* underline glow */
+.action-btn::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-2px;
+    width:100%;
+    height:2px;
+    background:currentColor;
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .2s ease;
+    opacity:.6;
+}
+
+.action-btn:hover::after{
+    transform:scaleX(1);
+}
+
+.group .action-btn{
+    opacity:.85;
+    transition:opacity .2s ease, transform .15s ease;
+}
+
+.group:hover .action-btn{
+    opacity:1;
+}
+
 /* ================= TOMSELECT ================= */
 
 /* wrapper */
@@ -259,14 +308,13 @@
 
                 <!-- actions -->
                 <div class="flex gap-4 mt-3 text-sm font-medium">
-                    <button class="editBtn text-blue-400 hover:text-blue-300" data-id="{{ t.id }}">
+                    <button class="editBtn action-btn text-blue-400 hover:text-blue-300" data-id="{{ t.id }}">
                         Edit
                     </button>
 
-                    <a href="{% url 'transaction_delete' t.id %}"
-                    class="text-red-400">
+                    <button class="deleteBtn action-btn text-red-400 hover:text-red-300" data-url="{% url 'transaction_delete' t.id %}">
                         Hapus
-                    </a>
+                    </button>
                 </div>
 
             </div>
@@ -300,7 +348,7 @@
                     <tbody class="divide-y divide-gray-700">
 
                         {% for t in tx_income %}
-                        <tr class="hover:bg-gray-800/60 transition duration-200">
+                        <tr class="hover:bg-gray-800/60 transition duration-200 group">
 
                             <td class="p-3 text-center">
                                 {{ t.date|date:"d M Y" }}
@@ -323,14 +371,17 @@
                             </td>
 
                             <td class="p-3 text-center">
-                                <button class="editBtn text-blue-400 hover:text-blue-300" data-id="{{ t.id }}">
-                                    Edit
-                                </button>
+                                <div class="flex justify-center gap-4">
+                                    <button class="editBtn action-btn text-blue-400 hover:text-blue-300 group-hover:translate-x-0.5"
+                                        data-id="{{ t.id }}">
+                                        Edit
+                                    </button>
 
-                                <a href="{% url 'transaction_delete' t.id %}"
-                                class="text-red-400 hover:text-red-300 ml-2">
-                                Hapus
-                                </a>
+                                    <button class="deleteBtn action-btn text-red-400 hover:text-red-300"
+                                            data-url="{% url 'transaction_delete' t.id %}">
+                                        Hapus
+                                    </button>
+                                </div>
                             </td>
 
                         </tr>
@@ -404,15 +455,14 @@
                 {% endif %}
 
                 <div class="flex gap-4 mt-3 text-sm font-medium">
-                    <button class="editBtn text-blue-400 hover:text-blue-300"
+                    <button class="editBtn action-btn text-blue-400 hover:text-blue-300"
                             data-id="{{ t.id }}">
                         Edit
                     </button>
 
-                    <a href="{% url 'transaction_delete' t.id %}"
-                    class="text-red-400">
+                    <button class="deleteBtn action-btn text-red-400 hover:text-red-300" data-url="{% url 'transaction_delete' t.id %}">
                         Hapus
-                    </a>
+                    </button>
                 </div>
 
             </div>
@@ -446,7 +496,7 @@
                     <tbody class="divide-y divide-gray-700">
 
                         {% for t in tx_expense %}
-                        <tr class="hover:bg-gray-800/60 transition duration-200">
+                        <tr class="hover:bg-gray-800/60 transition duration-200 group">
 
                             <td class="p-3 text-center">
                                 {{ t.date|date:"d M Y" }}
@@ -469,15 +519,17 @@
                             </td>
 
                             <td class="p-3 text-center">
-                                <button class="editBtn text-blue-400 hover:text-blue-300"
+                                <div class="flex justify-center gap-4">
+                                    <button class="editBtn action-btn text-blue-400 hover:text-blue-300 group-hover:translate-x-0.5"
                                         data-id="{{ t.id }}">
                                     Edit
-                                </button>
+                                    </button>
 
-                                <a href="{% url 'transaction_delete' t.id %}"
-                                class="text-red-400 hover:text-red-300 ml-2">
-                                Hapus
-                                </a>
+                                    <button class="deleteBtn action-btn text-red-400 hover:text-red-300" 
+                                            data-url="{% url 'transaction_delete' t.id %}">
+                                        Hapus
+                                    </button>
+                                </div>
                             </td>
 
                         </tr>
@@ -517,6 +569,32 @@ class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden opacity-0 transition"><
 class="fixed bottom-5 left-1/2 -translate-x-1/2 
 bg-red-500 text-white px-5 py-3 rounded-xl
 opacity-0 pointer-events-none transition duration-300 z-[200]">
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteModal" class="fixed inset-0 hidden z-[210] flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+  <div class="relative bg-gray-900 border border-gray-700 rounded-2xl p-6 w-[320px] shadow-2xl">
+    
+    <h3 class="text-lg font-semibold mb-2">Hapus transaksi?</h3>
+    <p class="text-sm text-gray-400 mb-5">
+      Data yang dihapus tidak bisa dikembalikan.
+    </p>
+
+    <div class="flex gap-3 justify-end">
+      <button id="cancelDelete"
+        class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600">
+        Batal
+      </button>
+
+      <a id="confirmDelete"
+         class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white">
+        Hapus
+      </a>
+    </div>
+
+  </div>
 </div>
 
 <!-- SHEET -->
@@ -971,5 +1049,21 @@ function closeAllSheets(){
     closeSheet();
     closeEditSheet();
 }
+
+const deleteModal = document.getElementById("deleteModal");
+const confirmDelete = document.getElementById("confirmDelete");
+const cancelDelete = document.getElementById("cancelDelete");
+
+document.querySelectorAll(".deleteBtn").forEach(btn=>{
+  btn.addEventListener("click", function(){
+    const url = this.dataset.url;
+    confirmDelete.href = url;
+    deleteModal.classList.remove("hidden");
+  });
+});
+
+cancelDelete.addEventListener("click", ()=>{
+  deleteModal.classList.add("hidden");
+});
 </script>
 {% endblock %}
